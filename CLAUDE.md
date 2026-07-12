@@ -13,6 +13,8 @@ Not yet built: navigation (there is no `react-navigation` yet — the Commit and
 - `index.html` — a self-contained interactive mockup of the three v1 screens (Timeline, Commit, Failed detail). The app's `src/ui/theme.ts` design tokens are lifted from it. Open directly (`open index.html`); no build step.
 - `KNOWN_BUGS.md` — reviewed-but-unfixed issues (repository lacks `getById`, `complete()` lifecycle gaps, `getAll()` reference leak). Remove entries here when you fix them.
 
+**Expo version directive:** this is Expo **SDK 57** (`expo ~57.0.4`), whose APIs differ from older majors. Read the version-pinned docs at https://docs.expo.dev/versions/v57.0.0/ before writing Expo/RN code; do not rely on memory of earlier SDKs.
+
 ## Commands
 
 - `npm start` — Expo dev server (then pick a platform from the CLI menu).
