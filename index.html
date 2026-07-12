@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Commit72 — Mockup Playground</title>
+<style>
+  :root{
+    --bg:#0b0c10;
+    --panel:#141519;
+    --panel-2:#1b1d23;
+    --border:#26282f;
+    --text:#f4f4f5;
+    --text-dim:#8a8d96;
+    --text-faint:#54575f;
+    --mono: "SF Mono", "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+    --accent-h: 6;
+    --fresh:#3ddc84;
+    --mid:#f5c542;
+    --urgent: hsl(var(--accent-h) 90% 58%);
+    --failed:#6b6e76;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:var(--sans);}
+  body{
+    display:grid;
+    grid-template-columns: 340px 1fr;
+    min-height:100vh;
+  }
+  /* ---------- CONTROLS ---------- */
+  .controls{
+    background:var(--panel);
+    border-right:1px solid var(--border);
+    padding:24px 20px;
+    overflow-y:auto;
+    display:flex;
+    flex-direction:column;
+    gap:22px;
+  }
+  .brand{
+    font-size:13px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--text-dim);
+    font-weight:600;
+    margin-bottom:-6px;
+  }
+  .group{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .group-label{
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    color:var(--text-faint);
+    font-weight:700;
+  }
+  .seg{
+    display:flex;
+    background:var(--panel-2);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:3px;
+    gap:3px;
+  }
+  .seg button{
+    flex:1;
+    background:transparent;
+    border:none;
+    color:var(--text-dim);
+    font-family:var(--sans);
+    font-size:12.5px;
+    font-weight:600;
+    padding:8px 6px;
+    border-radius:7px;
+    cursor:pointer;
+    transition:background .15s, color .15s;
+  }
+  .seg button.active{
+    background:#2a2d35;
+    color:var(--text);
+  }
+  .preset-grid{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap:8px;
+  }
+  .preset-card{
+    background:var(--panel-2);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:10px 10px;
+    cursor:pointer;
+    text-align:left;
+    color:var(--text);
+    font-family:var(--sans);
+  }
+  .preset-card:hover{border-color:#3a3d46;}
+  .preset-card .pname{font-size:12.5px; font-weight:700;}
+  .preset-card .pdesc{font-size:11px; color:var(--text-faint); margin-top:2px; line-height:1.3;}
+  .row{display:flex; align-items:center; justify-content:space-between; gap:10px;}
+  .row label{font-size:12.5px; color:var(--text-dim);}
+  input[type=range]{
+    width:100%;
+    accent-color: hsl(var(--accent-h) 80% 55%);
+  }
+  .val{font-family:var(--mono); font-size:11.5px; color:var(--text-faint);}
+  .toggle{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    background:var(--panel-2);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:10px 12px;
+  }
+  .toggle span{font-size:12.5px; color:var(--text-dim);}
+  .switch{
+    width:38px; height:22px;
+    background:#33353d;
+    border-radius:99px;
+    position:relative;
+    cursor:pointer;
+    transition:background .15s;
+    flex-shrink:0;
+  }
+  .switch.on{background: hsl(var(--accent-h) 70% 45%);}
+  .switch::after{
+    content:'';
+    position:absolute;
+    top:2px; left:2px;
+    width:18px; height:18px;
+    background:#fff;
+    border-radius:50%;
+    transition:transform .15s;
+  }
+  .switch.on::after{transform:translateX(16px);}
+
+  .prompt-box{
+    background:var(--panel-2);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:12px;
+    font-family:var(--mono);
+    font-size:11.5px;
+    line-height:1.55;
+    color:#c9cbd1;
+    white-space:pre-wrap;
+  }
+  .copy-btn{
+    background: hsl(var(--accent-h) 70% 45%);
+    border:none;
+    color:#fff;
+    font-family:var(--sans);
+    font-weight:700;
+    font-size:12.5px;
+    padding:10px;
+    border-radius:9px;
+    cursor:pointer;
+    width:100%;
+  }
+  .copy-btn:active{transform:scale(0.98);}
+
+  /* ---------- PREVIEW ---------- */
+  .preview-wrap{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:40px;
+    background:
+      radial-gradient(circle at 30% 20%, #15161b 0%, var(--bg) 60%);
+  }
+  .phone{
+    background:#000;
+    border-radius:46px;
+    padding:12px;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.6), 0 0 0 1px #2a2c33;
+    transition: width .2s ease;
+  }
+  .screen{
+    background: linear-gradient(180deg, #0d0e12 0%, #08090b 100%);
+    border-radius:34px;
+    overflow:hidden;
+    height:820px;
+    display:flex;
+    flex-direction:column;
+    position:relative;
+  }
+  .statusbar{
+    height:46px;
+    flex-shrink:0;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 26px;
+    font-family:var(--mono);
+    font-size:12px;
+    color:#e5e5e7;
+  }
+  .app-body{
+    flex:1;
+    overflow:hidden;
+    padding:6px 20px 20px;
+    display:flex;
+    flex-direction:column;
+  }
+
+  /* header */
+  .app-header{margin-bottom:18px;}
+  .app-title{
+    font-size:26px;
+    font-weight:800;
+    letter-spacing:-0.02em;
+    margin:0 0 2px;
+  }
+  .app-sub{
+    font-size:13px;
+    color:var(--text-dim);
+    margin:0;
+  }
+
+  /* task cards */
+  .task-list{display:flex; flex-direction:column; gap:12px; overflow-y:auto;}
+  .task-card{
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:16px;
+    position:relative;
+    overflow:hidden;
+  }
+  .task-card.urgent{border-color: hsla(var(--accent-h),90%,58%,0.5);}
+  .task-card.failed{
+    background:#151517;
+    border-color:#2a2b2f;
+  }
+  .task-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:10px;
+    margin-bottom:12px;
+  }
+  .task-title{
+    font-size:15.5px;
+    font-weight:650;
+    line-height:1.3;
+  }
+  .task-card.failed .task-title{
+    color:var(--text-dim);
+    text-decoration: line-through;
+    text-decoration-color:#4a4c53;
+    text-decoration-thickness: 1.5px;
+  }
+  .badge{
+    font-family:var(--mono);
+    font-size:10px;
+    font-weight:700;
+    letter-spacing:0.04em;
+    text-transform:uppercase;
+    padding:4px 8px;
+    border-radius:6px;
+    flex-shrink:0;
+    white-space:nowrap;
+  }
+  .badge.fresh{background:hsla(150,60%,45%,0.16); color:var(--fresh);}
+  .badge.mid{background:hsla(45,90%,55%,0.16); color:var(--mid);}
+  .badge.urgent{background:hsla(var(--accent-h),90%,58%,0.18); color:var(--urgent); animation:pulse 1.6s ease-in-out infinite;}
+  .badge.failed{background:#2a2b2f; color:#8c8e94;}
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.55;}}
+
+  .progress-track{
+    height:6px;
+    background:#232429;
+    border-radius:99px;
+    overflow:hidden;
+    margin-bottom:8px;
+  }
+  .progress-fill{height:100%; border-radius:99px;}
+  .task-meta{
+    display:flex;
+    justify-content:space-between;
+    font-family:var(--mono);
+    font-size:11px;
+    color:var(--text-faint);
+  }
+  .task-meta .countdown{font-weight:700;}
+  .task-meta .countdown.fresh{color:var(--fresh);}
+  .task-meta .countdown.mid{color:var(--mid);}
+  .task-meta .countdown.urgent{color:var(--urgent);}
+  .task-meta .countdown.failed{color:#6b6e76;}
+
+  .fab{
+    position:absolute;
+    right:20px;
+    bottom:26px;
+    width:56px; height:56px;
+    border-radius:50%;
+    background: hsl(var(--accent-h) 85% 55%);
+    display:flex; align-items:center; justify-content:center;
+    box-shadow: 0 8px 24px hsla(var(--accent-h),80%,50%,0.4);
+    font-size:26px;
+    color:#0b0c10;
+    font-weight:700;
+  }
+
+  /* commit screen */
+  .commit-copy{
+    font-size:13px;
+    color:var(--text-dim);
+    line-height:1.5;
+    margin:2px 0 22px;
+  }
+  .commit-input{
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:16px;
+    font-size:16px;
+    color:var(--text);
+    margin-bottom:16px;
+  }
+  .commit-input.placeholder{color:var(--text-faint);}
+  .clock-preview{
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:20px;
+    text-align:center;
+    margin-bottom:24px;
+  }
+  .clock-num{
+    font-family:var(--mono);
+    font-size:44px;
+    font-weight:800;
+    letter-spacing:-0.02em;
+    line-height:1;
+    color:var(--urgent);
+  }
+  .clock-label{
+    font-size:11px;
+    color:var(--text-faint);
+    text-transform:uppercase;
+    letter-spacing:0.08em;
+    margin-top:6px;
+  }
+  .commit-note{
+    font-size:11.5px;
+    color:var(--text-faint);
+    text-align:center;
+    line-height:1.5;
+    margin-bottom:16px;
+  }
+  .commit-btn{
+    margin-top:auto;
+    background: hsl(var(--accent-h) 85% 55%);
+    color:#0b0c10;
+    border:none;
+    border-radius:16px;
+    padding:18px;
+    font-size:15.5px;
+    font-weight:800;
+    letter-spacing:0.01em;
+    text-align:center;
+    box-shadow: 0 10px 30px hsla(var(--accent-h),80%,50%,0.25);
+  }
+  .commit-sub{
+    text-align:center;
+    font-size:11px;
+    color:var(--text-faint);
+    margin-top:10px;
+  }
+
+  /* failed detail screen */
+  .failed-hero{
+    text-align:center;
+    padding:30px 10px 24px;
+  }
+  .failed-icon{
+    width:64px; height:64px;
+    border-radius:50%;
+    background:#1c1d21;
+    border:1px solid #2c2d32;
+    display:flex; align-items:center; justify-content:center;
+    margin:0 auto 16px;
+    font-size:28px;
+  }
+  .failed-hero h2{
+    font-size:19px;
+    margin:0 0 6px;
+    font-weight:800;
+  }
+  .failed-hero p{
+    font-size:13px;
+    color:var(--text-dim);
+    line-height:1.5;
+    margin:0;
+  }
+  .failed-detail-card{
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:18px;
+    margin-top:6px;
+  }
+  .failed-stat-row{
+    display:flex;
+    justify-content:space-between;
+    padding:10px 0;
+    border-bottom:1px solid var(--border);
+    font-size:12.5px;
+  }
+  .failed-stat-row:last-child{border-bottom:none;}
+  .failed-stat-row span:first-child{color:var(--text-faint);}
+  .failed-stat-row span:last-child{font-family:var(--mono); color:var(--text-dim); font-weight:600;}
+  .failed-actions{
+    display:flex;
+    gap:10px;
+    margin-top:20px;
+  }
+  .failed-actions button{
+    flex:1;
+    border-radius:14px;
+    padding:14px;
+    font-size:13.5px;
+    font-weight:700;
+    border:none;
+    cursor:default;
+  }
+  .btn-recommit{
+    background: hsl(var(--accent-h) 85% 55%);
+    color:#0b0c10;
+  }
+  .btn-release{
+    background:var(--panel-2);
+    border:1px solid var(--border);
+    color:var(--text-dim);
+  }
+
+  footer.credit{
+    grid-column:1/-1;
+    display:none;
+  }
+
+  @media (max-width: 900px){
+    body{grid-template-columns:1fr;}
+    .controls{border-right:none; border-bottom:1px solid var(--border);}
+  }
+</style>
+</head>
+<body>
+
+<div class="controls">
+  <div class="brand">Commit72 · Mockup Explorer</div>
+
+  <div class="group">
+    <div class="group-label">Screen</div>
+    <div class="seg" id="screenSeg">
+      <button data-v="timeline" class="active">Timeline</button>
+      <button data-v="commit">Commit</button>
+      <button data-v="failed">Failed</button>
+    </div>
+  </div>
+
+  <div class="group">
+    <div class="group-label">Presets</div>
+    <div class="preset-grid" id="presets">
+      <div class="preset-card" data-preset="freshstart">
+        <div class="pname">Fresh Start</div>
+        <div class="pdesc">Two tasks, just committed</div>
+      </div>
+      <div class="preset-card" data-preset="grindday">
+        <div class="pname">Grind Day</div>
+        <div class="pdesc">4 tasks, one near deadline</div>
+      </div>
+      <div class="preset-card" data-preset="slipping">
+        <div class="pname">Slipping</div>
+        <div class="pdesc">A clock ran out</div>
+      </div>
+      <div class="preset-card" data-preset="committing">
+        <div class="pname">Committing</div>
+        <div class="pdesc">Mid-commit flow</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="group">
+    <div class="group-label">Device</div>
+    <div class="row"><label>Viewport width</label><span class="val" id="vpVal">375px</span></div>
+    <input type="range" id="vpSlider" min="360" max="430" value="375">
+  </div>
+
+  <div class="group">
+    <div class="group-label">Urgency accent hue</div>
+    <div class="row"><label>Hue</label><span class="val" id="hueVal">6°</span></div>
+    <input type="range" id="hueSlider" min="0" max="359" value="6">
+  </div>
+
+  <div class="group">
+    <div class="group-label">Timeline content</div>
+    <div class="row"><label>Task count</label><span class="val" id="countVal">4</span></div>
+    <input type="range" id="countSlider" min="2" max="5" value="4">
+    <div class="toggle">
+      <span>Show a failed task</span>
+      <div class="switch on" id="failedToggle"></div>
+    </div>
+  </div>
+
+  <div class="group">
+    <div class="group-label">Prompt for developer</div>
+    <div class="prompt-box" id="promptBox"></div>
+    <button class="copy-btn" id="copyBtn">Copy Prompt</button>
+  </div>
+</div>
+
+<div class="preview-wrap">
+  <div class="phone" id="phone">
+    <div class="screen" id="screen">
+      <div class="statusbar">
+        <span>9:41</span>
+        <span>●●●● 5G 🔋</span>
+      </div>
+      <div class="app-body" id="appBody"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const state = {
+  screen: 'timeline',
+  viewport: 375,
+  hue: 6,
+  taskCount: 4,
+  showFailed: true,
+};
+const DEFAULTS = { screen:'timeline', viewport:375, hue:6, taskCount:4, showFailed:true };
+
+const TASK_TITLES = [
+  "Ship the onboarding redesign",
+  "Reply to Marcus re: contract",
+  "Draft Q3 budget doc",
+  "Book flights for offsite",
+  "Fix the flaky checkout test",
+  "Write the postmortem"
+];
+
+// urgency helper: given elapsed fraction of 72h, return state
+function urgencyOf(frac){
+  if(frac >= 1) return 'failed';
+  if(frac >= 0.75) return 'urgent';
+  if(frac >= 0.35) return 'mid';
+  return 'fresh';
+}
+function colorVarFor(level){
+  return {fresh:'var(--fresh)', mid:'var(--mid)', urgent:'var(--urgent)', failed:'var(--failed)'}[level];
+}
+function labelFor(level){
+  return {fresh:'FRESH', mid:'IN PROGRESS', urgent:'URGENT', failed:'FAILED'}[level];
+}
+function hoursLeftText(frac){
+  const totalH = 72;
+  const left = Math.max(0, Math.round(totalH * (1-frac)));
+  if(frac >= 1) return 'Expired';
+  if(left < 1) return '< 1h left';
+  return left + 'h left';
+}
+
+function buildTaskSet(){
+  // deterministic spread of urgency across taskCount, ensuring variety
+  const fracsPool = [0.08, 0.42, 0.68, 0.88, 0.5];
+  const n = state.taskCount;
+  const tasks = [];
+  for(let i=0;i<n;i++){
+    tasks.push({
+      title: TASK_TITLES[i % TASK_TITLES.length],
+      frac: fracsPool[i % fracsPool.length]
+    });
+  }
+  if(state.showFailed){
+    tasks[tasks.length-1] = { title:"Update client proposal deck", frac: 1.15 };
+  }
+  return tasks;
+}
+
+function renderTimeline(){
+  const tasks = buildTaskSet();
+  let html = `
+    <div class="app-header">
+      <p class="app-title">Next 72</p>
+      <p class="app-sub">${tasks.filter(t=>t.frac<1).length} active commitments</p>
+    </div>
+    <div class="task-list">`;
+  tasks.forEach(t=>{
+    const level = urgencyOf(t.frac);
+    const pct = Math.min(1, t.frac) * 100;
+    const failedCls = level === 'failed' ? ' failed' : (level==='urgent' ? ' urgent' : '');
+    html += `
+      <div class="task-card${failedCls}">
+        <div class="task-top">
+          <div class="task-title">${t.title}</div>
+          <div class="badge ${level}">${labelFor(level)}</div>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" style="width:${pct}%; background:${colorVarFor(level)};"></div>
+        </div>
+        <div class="task-meta">
+          <span>Committed ${Math.round(t.frac*72)}h ago</span>
+          <span class="countdown ${level}">${hoursLeftText(t.frac)}</span>
+        </div>
+      </div>`;
+  });
+  html += `</div><div class="fab">+</div>`;
+  document.getElementById('appBody').innerHTML = html;
+}
+
+function renderCommit(){
+  document.getElementById('appBody').innerHTML = `
+    <div class="app-header">
+      <p class="app-title">Commit</p>
+      <p class="commit-copy">What will you finish in the next 72 hours? Once you commit, the clock doesn't stop.</p>
+    </div>
+    <div class="commit-input placeholder">Update client proposal deck</div>
+    <div class="clock-preview">
+      <div class="clock-num">72:00</div>
+      <div class="clock-label">Hours from the moment you commit</div>
+    </div>
+    <p class="commit-note">This can't be paused, extended, or rescheduled.<br>If it's not done in 72 hours, it's marked failed.</p>
+    <div class="commit-btn">Commit for 72 Hours</div>
+    <div class="commit-sub">No drafts. No "someday."</div>
+  `;
+}
+
+function renderFailed(){
+  document.getElementById('appBody').innerHTML = `
+    <div class="failed-hero">
+      <div class="failed-icon">⏱</div>
+      <h2>Clock ran out</h2>
+      <p>This commitment expired before it was finished.<br>It's staying visible — not disappearing.</p>
+    </div>
+    <div class="failed-detail-card">
+      <div class="task-title" style="text-decoration:line-through; text-decoration-color:#4a4c53; color:var(--text-dim); margin-bottom:14px;">
+        Update client proposal deck
+      </div>
+      <div class="failed-stat-row"><span>Committed</span><span>Mon 9:12 AM</span></div>
+      <div class="failed-stat-row"><span>Deadline</span><span>Thu 9:12 AM</span></div>
+      <div class="failed-stat-row"><span>Status</span><span style="color:var(--urgent);">FAILED — 0% done</span></div>
+    </div>
+    <div class="failed-actions">
+      <button class="btn-release">Let it go</button>
+      <button class="btn-recommit">Re-commit, 72h</button>
+    </div>
+  `;
+}
+
+function render(){
+  if(state.screen === 'timeline') renderTimeline();
+  else if(state.screen === 'commit') renderCommit();
+  else renderFailed();
+
+  document.getElementById('phone').style.width = (state.viewport + 24) + 'px';
+  document.documentElement.style.setProperty('--accent-h', state.hue);
+  document.getElementById('vpVal').textContent = state.viewport + 'px';
+  document.getElementById('hueVal').textContent = state.hue + '°';
+  document.getElementById('countVal').textContent = state.taskCount;
+
+  document.querySelectorAll('#screenSeg button').forEach(b=>{
+    b.classList.toggle('active', b.dataset.v === state.screen);
+  });
+  document.getElementById('failedToggle').classList.toggle('on', state.showFailed);
+
+  updatePrompt();
+}
+
+function updatePrompt(){
+  const screenNames = {timeline:'the primary timeline screen', commit:'the commit/add-task screen', failed:'the failed-task detail screen'};
+  const parts = [];
+  parts.push(`Build ${screenNames[state.screen]} for Commit72, a mobile app where each task starts its own 72-hour countdown the moment a user commits to it — there is no shared or resetting window, every task has an independent deadline.`);
+
+  if(state.screen === 'timeline'){
+    parts.push(`Show ${state.taskCount} committed tasks as cards in a vertical list, each with a title, an urgency badge (FRESH / IN PROGRESS / URGENT / FAILED), and a progress bar tracking elapsed time toward that task's own 72h deadline.`);
+    parts.push(state.showFailed
+      ? `Include one task whose clock has expired: strike through its title, mute its color, and label it FAILED — it stays visible rather than disappearing.`
+      : `All tasks shown are still active (no failed task in this view).`);
+    parts.push(`A floating "+" action button in the bottom-right opens the commit flow.`);
+  } else if(state.screen === 'commit'){
+    parts.push(`A single text input for the task title, a prominent "72:00" countdown preview that visually reinforces the clock starts immediately on commit, and a bold commit button ("Commit for 72 Hours"). Include a short note that the commitment can't be paused, extended, or rescheduled — framing this as a deliberate act, not a quick add-item form.`);
+  } else {
+    parts.push(`A centered "clock ran out" hero state, a detail card showing the task's committed time, deadline, and FAILED status, and two actions: a neutral "let it go" and a primary "re-commit, 72h" button. The failed state should be visually unambiguous from active tasks — desaturated, struck-through title, no progress animation.`);
+  }
+
+  if(state.hue !== DEFAULTS.hue){
+    parts.push(`Use an accent/urgency color at hue ${state.hue}° (HSL) for the most-urgent state and primary actions.`);
+  } else {
+    parts.push(`Use a warm red-orange accent (hue ~6°) for the most-urgent state and primary actions.`);
+  }
+  parts.push(`Design mobile-first at roughly ${state.viewport}px width, dark theme, bold condensed sans-serif for headings, monospace for countdown numbers and timestamps.`);
+
+  document.getElementById('promptBox').textContent = parts.join(' ');
+}
+
+document.getElementById('screenSeg').addEventListener('click', e=>{
+  const btn = e.target.closest('button');
+  if(!btn) return;
+  state.screen = btn.dataset.v;
+  render();
+});
+document.getElementById('vpSlider').addEventListener('input', e=>{
+  state.viewport = parseInt(e.target.value);
+  render();
+});
+document.getElementById('hueSlider').addEventListener('input', e=>{
+  state.hue = parseInt(e.target.value);
+  render();
+});
+document.getElementById('countSlider').addEventListener('input', e=>{
+  state.taskCount = parseInt(e.target.value);
+  render();
+});
+document.getElementById('failedToggle').addEventListener('click', ()=>{
+  state.showFailed = !state.showFailed;
+  render();
+});
+document.getElementById('presets').addEventListener('click', e=>{
+  const card = e.target.closest('.preset-card');
+  if(!card) return;
+  const p = card.dataset.preset;
+  if(p === 'freshstart'){ Object.assign(state, {screen:'timeline', taskCount:2, showFailed:false, hue:6}); }
+  if(p === 'grindday'){ Object.assign(state, {screen:'timeline', taskCount:4, showFailed:false, hue:6}); }
+  if(p === 'slipping'){ Object.assign(state, {screen:'timeline', taskCount:4, showFailed:true, hue:6}); }
+  if(p === 'committing'){ Object.assign(state, {screen:'commit', hue:6}); }
+  render();
+});
+document.getElementById('copyBtn').addEventListener('click', ()=>{
+  navigator.clipboard.writeText(document.getElementById('promptBox').textContent).then(()=>{
+    const b = document.getElementById('copyBtn');
+    const orig = b.textContent;
+    b.textContent = 'Copied!';
+    setTimeout(()=>{ b.textContent = orig; }, 1200);
+  });
+});
+
+render();
+</script>
+
+</body>
+</html>
