@@ -117,27 +117,36 @@ export class TaskService {
     const failed: Task[] = [];
     const deleted: Task[] = [];
 
-    for (const task of this.repository.getAll()) {
-      if (task.completedAt !== null) continue;
+    for (const stored of this.repository.getAll()) {
+      if (stored.completedAt !== null) continue;
 
-      if (task.failedAt === null && now >= task.deadlineAt) {
-        const updated: Task = {
-          ...task,
-          failedAt: now,
-          autoDeleteAt: now + SEVENTY_TWO_HOURS_MS,
-        };
-        this.repository.update(updated);
-        failed.push(updated);
-        continue;
-      }
+      // Anchor failure to the deadline (a past fact), never to sweep time (an
+      // observation). Otherwise opening the app late would restart the grace
+      // window — see TECH_DESIGN.md §2, self-correcting read path.
+      const justFailed = stored.failedAt === null && now >= stored.deadlineAt;
+      const task: Task = justFailed
+        ? {
+            ...stored,
+            failedAt: stored.deadlineAt,
+            autoDeleteAt: stored.deadlineAt + SEVENTY_TWO_HOURS_MS,
+          }
+        : stored;
 
-      if (
+      // A task overdue by more than the grace period fails and is deleted in
+      // one sweep (e.g. app closed for days), rather than surviving one grace
+      // window per foreground. When that happens it is reported only as
+      // deleted — it never persisted long enough to surface as failed.
+      const pastGrace =
         task.failedAt !== null &&
         task.autoDeleteAt !== null &&
-        now >= task.autoDeleteAt
-      ) {
+        now >= task.autoDeleteAt;
+
+      if (pastGrace) {
         this.repository.delete(task.id);
         deleted.push(task);
+      } else if (justFailed) {
+        this.repository.update(task);
+        failed.push(task);
       }
     }
 

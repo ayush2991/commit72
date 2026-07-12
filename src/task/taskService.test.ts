@@ -114,6 +114,38 @@ describe('TaskService.sweep', () => {
     expect(repository.getAll()).toHaveLength(0);
   });
 
+  it('anchors failedAt to the deadline, not to a late sweep time', () => {
+    const { service, repository, setNow } = makeService({ now: 0 });
+    const task = service.commit('Missed while app was closed');
+
+    // App reopened well after the deadline but still within the grace window.
+    setNow(SEVENTY_TWO_HOURS_MS + SEVENTY_TWO_HOURS_MS / 2);
+    const result = service.sweep();
+
+    expect(result.failed.map((t) => t.id)).toEqual([task.id]);
+    const stored = repository.getAll().find((t) => t.id === task.id)!;
+    // Failure is dated at the deadline itself, so the grace window is not
+    // silently restarted by opening the app late.
+    expect(stored.failedAt).toBe(SEVENTY_TWO_HOURS_MS);
+    expect(stored.autoDeleteAt).toBe(SEVENTY_TWO_HOURS_MS * 2);
+  });
+
+  it('fails and deletes in one sweep when reopened past the grace window', () => {
+    const { service, repository, setNow } = makeService({ now: 0 });
+    const task = service.commit('Missed for over a week');
+
+    // App closed long enough to blow past both the deadline and the grace
+    // period — a single sweep must fully retire the task.
+    setNow(SEVENTY_TWO_HOURS_MS * 5);
+    const result = service.sweep();
+
+    // Reported only as deleted: it never survived long enough to surface as
+    // a live failed task.
+    expect(result.deleted.map((t) => t.id)).toEqual([task.id]);
+    expect(result.failed).toHaveLength(0);
+    expect(repository.getAll()).toHaveLength(0);
+  });
+
   it('never touches a completed task, even long past its deadline', () => {
     const { service, repository, setNow } = makeService({ now: 0 });
     const task = service.commit('Done early');
