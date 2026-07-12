@@ -35,6 +35,17 @@ describe('TaskService.commit', () => {
     expect(task.completedAt).toBeNull();
   });
 
+  it('honors a custom window (used by the dev-compressed clock)', () => {
+    const repository = new InMemoryTaskRepository();
+    const service = new TaskService({
+      repository,
+      now: () => 0,
+      windowMs: 90_000,
+    });
+    const task = service.commit('Short-fuse task');
+    expect(task.deadlineAt).toBe(90_000);
+  });
+
   it('trims the title and rejects empty/whitespace-only titles', () => {
     const { service } = makeService();
     expect(service.commit('  Buy milk  ').title).toBe('Buy milk');

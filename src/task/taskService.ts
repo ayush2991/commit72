@@ -15,6 +15,14 @@ export interface TaskServiceOptions {
   now?: () => number;
   generateId?: () => string;
   taskCap?: number;
+  /**
+   * Length of the commitment window (and the post-failure grace period).
+   * Defaults to the real 72h; the app compresses it in dev so the full
+   * lifecycle is watchable in seconds. deriveStatus is window-agnostic — it
+   * reads each task's own committedAt/deadlineAt — so this is the only place
+   * the duration lives.
+   */
+  windowMs?: number;
 }
 
 export interface SweepResult {
@@ -31,12 +39,14 @@ export class TaskService {
   private now: () => number;
   private generateId: () => string;
   private taskCap: number;
+  private windowMs: number;
 
   constructor(options: TaskServiceOptions) {
     this.repository = options.repository;
     this.now = options.now ?? Date.now;
     this.generateId = options.generateId ?? generateTaskId;
     this.taskCap = options.taskCap ?? DEFAULT_TASK_CAP;
+    this.windowMs = options.windowMs ?? SEVENTY_TWO_HOURS_MS;
   }
 
   commit(title: string): Task {
@@ -54,7 +64,7 @@ export class TaskService {
       id: this.generateId(),
       title: trimmed,
       committedAt: now,
-      deadlineAt: now + SEVENTY_TWO_HOURS_MS,
+      deadlineAt: now + this.windowMs,
       completedAt: null,
       failedAt: null,
       autoDeleteAt: null,
@@ -92,7 +102,7 @@ export class TaskService {
     const updated: Task = {
       ...task,
       committedAt: now,
-      deadlineAt: now + SEVENTY_TWO_HOURS_MS,
+      deadlineAt: now + this.windowMs,
       failedAt: null,
       autoDeleteAt: null,
       recommitCount: task.recommitCount + 1,
@@ -128,7 +138,7 @@ export class TaskService {
         ? {
             ...stored,
             failedAt: stored.deadlineAt,
-            autoDeleteAt: stored.deadlineAt + SEVENTY_TWO_HOURS_MS,
+            autoDeleteAt: stored.deadlineAt + this.windowMs,
           }
         : stored;
 

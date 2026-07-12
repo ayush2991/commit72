@@ -1,11 +1,36 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { useEffect } from 'react';
+import { AppState, Platform, StatusBar as RNStatusBar, StyleSheet, View } from 'react-native';
+import { useTaskStore } from './src/store/taskStore';
+import { TimelineScreen } from './src/ui/TimelineScreen';
+import { colors } from './src/ui/theme';
 
 export default function App() {
+  const sweep = useTaskStore((s) => s.sweep);
+
+  useEffect(() => {
+    // A ticking clock is what makes derived status live: deriveStatus is a pure
+    // function of `now`, so React only re-reads it if `now` advances. sweep()
+    // also persists failed/auto-deleted transitions (TECH_DESIGN.md §4).
+    const interval = setInterval(sweep, 1000);
+
+    // Self-heal on resume: mobile OSes don't run us in the background, so the
+    // authoritative correction happens when the app returns to the foreground.
+    const subscription = AppState.addEventListener('change', (next) => {
+      if (next === 'active') sweep();
+    });
+
+    sweep();
+    return () => {
+      clearInterval(interval);
+      subscription.remove();
+    };
+  }, [sweep]);
+
   return (
     <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
-      <StatusBar style="auto" />
+      <TimelineScreen />
+      <StatusBar style="light" />
     </View>
   );
 }
@@ -13,8 +38,8 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: colors.bg,
+    paddingTop:
+      Platform.OS === 'android' ? (RNStatusBar.currentHeight ?? 0) + 12 : 64,
   },
 });
