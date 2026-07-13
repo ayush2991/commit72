@@ -23,6 +23,7 @@
   "scripts": {
     "start": "expo start",
     "android": "expo run:android",
+    "android:deploy": "./scripts/deploy-android-local.sh",
     "ios": "expo run:ios",
     "web": "expo start --web",
     "test": "jest"
