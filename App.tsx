@@ -1,11 +1,13 @@
 import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { AppState, Platform, StatusBar as RNStatusBar, StyleSheet, View } from 'react-native';
 import { useTaskStore } from './src/store/taskStore';
 import { TimelineScreen } from './src/ui/TimelineScreen';
-import { colors } from './src/ui/theme';
+import { Palette, useTheme } from './src/ui/theme';
 
 export default function App() {
+  const { scheme, colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const sweep = useTaskStore((s) => s.sweep);
 
   useEffect(() => {
@@ -30,16 +32,18 @@ export default function App() {
   return (
     <View style={styles.container}>
       <TimelineScreen />
-      <StatusBar style="light" />
+      <StatusBar style={scheme === 'light' ? 'dark' : 'light'} />
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.bg,
-    paddingTop:
-      Platform.OS === 'android' ? (RNStatusBar.currentHeight ?? 0) + 12 : 64,
-  },
-});
+function makeStyles(colors: Palette) {
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.bg,
+      paddingTop:
+        Platform.OS === 'android' ? (RNStatusBar.currentHeight ?? 0) + 12 : 64,
+    },
+  });
+}

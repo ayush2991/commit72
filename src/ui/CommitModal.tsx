@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   KeyboardAvoidingView,
   Modal,
@@ -10,7 +10,7 @@ import {
   View,
 } from 'react-native';
 import { TaskCapReachedError } from '../task/types';
-import { colors, mono } from './theme';
+import { Palette, useTheme } from './theme';
 
 interface Props {
   visible: boolean;
@@ -24,6 +24,8 @@ interface Props {
  * "can't be paused" note come straight from the mockup copy.
  */
 export function CommitModal({ visible, onClose, onCommit }: Props) {
+  const { colors, mono } = useTheme();
+  const styles = useMemo(() => makeStyles(colors, mono), [colors, mono]);
   const [title, setTitle] = useState('');
   const [error, setError] = useState<string | null>(null);
 
@@ -103,92 +105,94 @@ export function CommitModal({ visible, onClose, onCommit }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  backdrop: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    backgroundColor: 'rgba(0,0,0,0.55)',
-  },
-  backdropFill: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-  },
-  sheet: {
-    backgroundColor: colors.bgElevated,
-    borderTopLeftRadius: 28,
-    borderTopRightRadius: 28,
-    borderTopWidth: 1,
-    borderColor: colors.border,
-    padding: 24,
-    paddingBottom: 40,
-    gap: 14,
-  },
-  title: {
-    color: colors.text,
-    fontSize: 24,
-    fontWeight: '800',
-    letterSpacing: -0.5,
-  },
-  copy: {
-    color: colors.textDim,
-    fontSize: 13,
-    lineHeight: 20,
-  },
-  input: {
-    backgroundColor: colors.panel,
-    borderColor: colors.border,
-    borderWidth: 1,
-    borderRadius: 14,
-    padding: 16,
-    fontSize: 16,
-    color: colors.text,
-  },
-  clock: {
-    backgroundColor: colors.panel,
-    borderColor: colors.border,
-    borderWidth: 1,
-    borderRadius: 16,
-    padding: 20,
-    alignItems: 'center',
-  },
-  clockNum: {
-    fontFamily: mono,
-    fontSize: 44,
-    fontWeight: '800',
-    color: colors.urgent,
-  },
-  clockLabel: {
-    color: colors.textFaint,
-    fontSize: 11,
-    letterSpacing: 0.8,
-    textTransform: 'uppercase',
-    marginTop: 6,
-  },
-  note: {
-    color: colors.textFaint,
-    fontSize: 11.5,
-    textAlign: 'center',
-    lineHeight: 18,
-  },
-  error: {
-    color: colors.urgent,
-    fontSize: 12.5,
-    textAlign: 'center',
-    lineHeight: 18,
-  },
-  commitBtn: {
-    backgroundColor: '#f2643a', // hsl(6 85% 55%)
-    borderRadius: 16,
-    padding: 18,
-    alignItems: 'center',
-    marginTop: 4,
-  },
-  commitBtnText: {
-    color: colors.bg,
-    fontSize: 15.5,
-    fontWeight: '800',
-  },
-});
+function makeStyles(colors: Palette, mono: string | undefined) {
+  return StyleSheet.create({
+    backdrop: {
+      flex: 1,
+      justifyContent: 'flex-end',
+      backgroundColor: colors.backdrop,
+    },
+    backdropFill: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+    },
+    sheet: {
+      backgroundColor: colors.bgElevated,
+      borderTopLeftRadius: 28,
+      borderTopRightRadius: 28,
+      borderTopWidth: 1,
+      borderColor: colors.border,
+      padding: 24,
+      paddingBottom: 40,
+      gap: 14,
+    },
+    title: {
+      color: colors.text,
+      fontSize: 24,
+      fontWeight: '800',
+      letterSpacing: -0.5,
+    },
+    copy: {
+      color: colors.textDim,
+      fontSize: 13,
+      lineHeight: 20,
+    },
+    input: {
+      backgroundColor: colors.panel,
+      borderColor: colors.border,
+      borderWidth: 1,
+      borderRadius: 14,
+      padding: 16,
+      fontSize: 16,
+      color: colors.text,
+    },
+    clock: {
+      backgroundColor: colors.panel,
+      borderColor: colors.border,
+      borderWidth: 1,
+      borderRadius: 16,
+      padding: 20,
+      alignItems: 'center',
+    },
+    clockNum: {
+      fontFamily: mono,
+      fontSize: 44,
+      fontWeight: '800',
+      color: colors.urgent,
+    },
+    clockLabel: {
+      color: colors.textFaint,
+      fontSize: 11,
+      letterSpacing: 0.8,
+      textTransform: 'uppercase',
+      marginTop: 6,
+    },
+    note: {
+      color: colors.textFaint,
+      fontSize: 11.5,
+      textAlign: 'center',
+      lineHeight: 18,
+    },
+    error: {
+      color: colors.urgent,
+      fontSize: 12.5,
+      textAlign: 'center',
+      lineHeight: 18,
+    },
+    commitBtn: {
+      backgroundColor: colors.accent,
+      borderRadius: 16,
+      padding: 18,
+      alignItems: 'center',
+      marginTop: 4,
+    },
+    commitBtnText: {
+      color: colors.bg,
+      fontSize: 15.5,
+      fontWeight: '800',
+    },
+  });
+}

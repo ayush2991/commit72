@@ -13,9 +13,11 @@ import { useTaskStore } from '../store/taskStore';
 import { CommitModal } from './CommitModal';
 import { sortForTimeline } from './format';
 import { TaskCard } from './TaskCard';
-import { colors } from './theme';
+import { Palette, useTheme } from './theme';
 
 export function TimelineScreen() {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const tasks = useTaskStore((s) => s.tasks);
   const now = useTaskStore((s) => s.now);
   const commit = useTaskStore((s) => s.commit);
@@ -109,63 +111,65 @@ export function TimelineScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    paddingHorizontal: 20,
-  },
-  header: {
-    marginBottom: 18,
-  },
-  title: {
-    color: colors.text,
-    fontSize: 26,
-    fontWeight: '800',
-    letterSpacing: -0.5,
-  },
-  sub: {
-    color: colors.textDim,
-    fontSize: 13,
-    marginTop: 2,
-  },
-  list: {
-    gap: 12,
-    paddingBottom: 120,
-  },
-  empty: {
-    paddingTop: 120,
-    alignItems: 'center',
-  },
-  emptyTitle: {
-    color: colors.textDim,
-    fontSize: 15,
-    fontWeight: '700',
-  },
-  emptyBody: {
-    color: colors.textFaint,
-    fontSize: 13,
-    marginTop: 6,
-  },
-  fab: {
-    position: 'absolute',
-    right: 20,
-    bottom: 32,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: '#f2643a', // hsl(6 85% 55%)
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: colors.urgent,
-    shadowOpacity: 0.4,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 8 },
-    elevation: 8,
-  },
-  fabText: {
-    color: colors.bg,
-    fontSize: 30,
-    fontWeight: '700',
-    marginTop: -2,
-  },
-});
+function makeStyles(colors: Palette) {
+  return StyleSheet.create({
+    root: {
+      flex: 1,
+      paddingHorizontal: 20,
+    },
+    header: {
+      marginBottom: 18,
+    },
+    title: {
+      color: colors.text,
+      fontSize: 26,
+      fontWeight: '800',
+      letterSpacing: -0.5,
+    },
+    sub: {
+      color: colors.textDim,
+      fontSize: 13,
+      marginTop: 2,
+    },
+    list: {
+      gap: 12,
+      paddingBottom: 120,
+    },
+    empty: {
+      paddingTop: 120,
+      alignItems: 'center',
+    },
+    emptyTitle: {
+      color: colors.textDim,
+      fontSize: 15,
+      fontWeight: '700',
+    },
+    emptyBody: {
+      color: colors.textFaint,
+      fontSize: 13,
+      marginTop: 6,
+    },
+    fab: {
+      position: 'absolute',
+      right: 20,
+      bottom: 32,
+      width: 56,
+      height: 56,
+      borderRadius: 28,
+      backgroundColor: colors.accent,
+      alignItems: 'center',
+      justifyContent: 'center',
+      shadowColor: colors.urgent,
+      shadowOpacity: 0.4,
+      shadowRadius: 12,
+      shadowOffset: { width: 0, height: 8 },
+      elevation: 8,
+    },
+    fabText: {
+      color: colors.bg,
+      fontSize: 30,
+      fontWeight: '700',
+      marginTop: -2,
+    },
+  });
+}
