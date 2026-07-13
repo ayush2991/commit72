@@ -12,6 +12,7 @@ import { Task } from '../task/types';
 import { useTaskStore } from '../store/taskStore';
 import { CommitModal } from './CommitModal';
 import { sortForTimeline } from './format';
+import { PipCard } from './PipCard';
 import { TaskCard } from './TaskCard';
 import { Palette, useTheme } from './theme';
 
@@ -84,6 +85,7 @@ export function TimelineScreen() {
         keyExtractor={(t) => t.id}
         contentContainerStyle={styles.list}
         showsVerticalScrollIndicator={false}
+        ListHeaderComponent={<PipCard live={activeCount} />}
         ListEmptyComponent={
           <View style={styles.empty}>
             <Text style={styles.emptyTitle}>Nothing committed yet</Text>

@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { InMemoryTaskRepository } from '../task/taskRepository';
 import { TaskService } from '../task/taskService';
 import { Task } from '../task/types';
+import { usePetStore } from './petStore';
 
 /**
  * The store owns a single TaskService over the in-memory repository. The
@@ -55,8 +56,12 @@ export const useTaskStore = create<TaskStore>((set) => {
       sync();
     },
     complete: (id) => {
+      // Pip only credits a fresh completion — complete() is idempotent, so
+      // re-tapping an already-done task must not inflate the kept count.
+      const alreadyDone = repository.getAll().find((t) => t.id === id)?.completedAt != null;
       service.complete(id);
       sync();
+      if (!alreadyDone) usePetStore.getState().recordKept();
     },
     recommit: (id) => {
       service.recommit(id);
@@ -67,8 +72,11 @@ export const useTaskStore = create<TaskStore>((set) => {
       sync();
     },
     sweep: () => {
-      service.sweep();
+      const result = service.sweep();
       sync();
+      if (result.failed.length > 0) {
+        usePetStore.getState().recordBroken(result.failed.length);
+      }
     },
   };
 });

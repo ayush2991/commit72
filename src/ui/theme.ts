@@ -4,7 +4,7 @@ import { TaskStatus } from '../task/types';
 import { useThemeStore } from '../store/themeStore';
 
 export type Scheme = 'light' | 'dark';
-export type ThemeId = 'default' | 'brutalist';
+export type ThemeId = 'default' | 'brutalist' | 'lockIn';
 
 export interface Palette {
   bg: string;
@@ -125,6 +125,38 @@ const brutalistColors: Palette = {
   badgeUrgentBg: 'rgba(255,59,25,0.18)',
 };
 
+// Lifted from the "1a — LOCK IN" mockup option (Commit72.dc.html /
+// PactPal.dc.html): a fixed disciplined-dark look, distinct from the
+// OS-driven default dark palette above (different status hues — active
+// tasks read blue "fresh" / green "mid" here, not green/yellow).
+const lockInColors: Palette = {
+  bg: '#0a0a0b',
+  bgElevated: '#0e0e11',
+  panel: '#151517',
+  panel2: '#1b1d23',
+  border: '#222226',
+  text: '#f5f5f4',
+  textDim: '#6b6b70',
+  textFaint: '#5c5a63',
+
+  fresh: '#64d2ff',
+  mid: '#30d158',
+  urgent: '#ff453a',
+  failed: '#8e8e93',
+
+  accent: '#ff453a',
+  backdrop: 'rgba(0,0,0,0.6)',
+  failedCardBg: '#151517',
+  failedCardBorder: '#2a2a2e',
+  trackBg: '#26262a',
+  urgentBorderAlpha: 'rgba(255,69,58,0.5)',
+  badgeFailedText: '#8c8e94',
+
+  badgeFreshBg: 'rgba(100,210,255,0.15)',
+  badgeMidBg: 'rgba(48,209,88,0.15)',
+  badgeUrgentBg: 'rgba(255,69,58,0.18)',
+};
+
 const palettes: Record<Scheme, Palette> = { dark: darkColors, light: lightColors };
 
 export function makeStatusColor(p: Palette): Record<TaskStatus, string> {
@@ -148,18 +180,23 @@ export const mono = Platform.select({
   default: 'monospace',
 });
 
+const FIXED_PALETTES: Partial<Record<ThemeId, Palette>> = {
+  brutalist: brutalistColors,
+  lockIn: lockInColors,
+};
+
 /**
  * Resolves the active theme. When the user has picked 'default' (the store's
- * initial value), this follows the OS appearance as before. When they've
- * picked 'brutalist', the fixed brutalistColors palette is used regardless of
- * OS scheme.
+ * initial value), this follows the OS appearance as before. Every other
+ * ThemeId maps to a single fixed palette regardless of OS scheme.
  */
 export function useTheme() {
   const themeId = useThemeStore((s) => s.themeId);
   const osScheme: Scheme = useColorScheme() === 'light' ? 'light' : 'dark';
-  const scheme: Scheme = themeId === 'brutalist' ? 'light' : osScheme;
+  const fixed = FIXED_PALETTES[themeId];
+  const scheme: Scheme = fixed ? (themeId === 'brutalist' ? 'light' : 'dark') : osScheme;
   return useMemo(() => {
-    const palette = themeId === 'brutalist' ? brutalistColors : palettes[scheme];
+    const palette = fixed ?? palettes[scheme];
     return {
       scheme,
       themeId,

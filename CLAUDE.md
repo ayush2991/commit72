@@ -4,13 +4,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project status
 
-Commit72 is an Expo (React Native + TypeScript) app in early implementation. Working today: the pure lifecycle logic in `src/task/`, and a first UI slice — a single **Timeline** screen (`src/ui/`) wired to a `zustand` store (`src/store/`) that owns a `TaskService`. Committing (via a modal off the FAB), completing, re-committing, deleting, and the timed fresh→mid→urgent→failed→auto-deleted progression all work on screen.
+Commit72 is an Expo (React Native + TypeScript) app in early implementation. Working today: the pure lifecycle logic in `src/task/`, and a UI (`src/ui/`) wired to two `zustand` stores (`src/store/`) — `taskStore` owns a `TaskService`, `themeStore` owns the active theme. `App.tsx` switches between two tabs via `TabBar` (`src/ui/TabBar.tsx`) — **Timeline** (`TimelineScreen`) and **Profile** (`ProfileScreen`) — with plain `useState`, no routing library. Committing (via a modal off the FAB), completing, re-committing, deleting, and the timed fresh→mid→urgent→failed→auto-deleted progression all work on screen. `ProfileScreen` is where the theme is switched between the two themes defined in `src/ui/theme.ts` (`default` and `brutalist`); `brutalist` forces the light color scheme regardless of OS setting.
 
-Not yet built: navigation (there is no `react-navigation` yet — the Commit and Failed flows from the mockup are a modal / `Alert` rather than routes), and real persistence (still `InMemoryTaskRepository`; the `expo-sqlite`-backed `TaskRepository` is unwritten, so **tasks reset on reload**).
+Not yet built: a proper navigation library (there is no `react-navigation` yet — tab switching is local state, and the Commit and Failed flows from the mockup are a modal / `Alert` rather than routes), and real persistence (still `InMemoryTaskRepository`; the `expo-sqlite`-backed `TaskRepository` is unwritten, so **tasks reset on reload**).
 
 - `PRD.md` — product requirements: the core mechanic, screen specs, resolved product decisions (task cap, notifications, failed-task lifecycle, platform targets, v2 scope).
 - `TECH_DESIGN.md` — technical design and **source of truth for architecture decisions**: stack, local-first no-backend architecture, SQLite data model, lifecycle logic, notification design.
-- `index.html` — a self-contained interactive mockup of the three v1 screens (Timeline, Commit, Failed detail). The app's `src/ui/theme.ts` design tokens are lifted from it. Open directly (`open index.html`); no build step.
+- `index.html` / `mockups-20260712.html` — self-contained interactive mockups (no build step, open directly with `open <file>`). `src/ui/theme.ts` design tokens are lifted from these.
 - `KNOWN_BUGS.md` — reviewed-but-unfixed issues (repository lacks `getById`, `complete()` lifecycle gaps, `getAll()` reference leak). Remove entries here when you fix them.
 
 **Expo version directive:** this is Expo **SDK 57** (`expo ~57.0.4`), whose APIs differ from older majors. Read the version-pinned docs at https://docs.expo.dev/versions/v57.0.0/ before writing Expo/RN code; do not rely on memory of earlier SDKs.
@@ -34,7 +34,7 @@ In dev builds (`__DEV__`), `src/store/taskStore.ts` passes a compressed `windowM
 
 ## Core product model (read `PRD.md` for full detail)
 
-The mechanic that differentiates this app from a standard to-do list: committing to a task starts a **per-task** 72-hour countdown (`deadlineAt = committedAt + 72h`). There is no shared/global window — every task has its own independent clock. If a task isn't completed before its clock expires, it becomes a visible **failed** state (not silently rolled over), with a 72-hour grace period to re-commit before auto-deletion.
+The mechanic that differentiates this app from a standard to-do list: committing to a task starts a **per-task** 72-hour countdown (`deadlineAt = committedAt + 72h`). There is no shared/global window — every task has its own independent clock. If a task isn't completed before its clock expires, it becomes a visible **failed** state (not silently rolled over), with a 72-hour grace period to re-commit before auto-deletion. Only `DEFAULT_TASK_CAP` (`src/task/types.ts`, currently 6) tasks may be *active* at once; done/failed tasks don't count against the cap.
 
 ## Architecture direction (read `TECH_DESIGN.md` for full detail)
 
@@ -51,7 +51,8 @@ src/ui/  ──reads/calls──▶  src/store/taskStore.ts  ──delegates─�
 
 - **`src/task/`** is pure, React-free lifecycle logic. `TaskService` (`taskService.ts`) depends only on the `TaskRepository` interface (`taskRepository.ts`), never a concrete engine — so swapping `InMemoryTaskRepository` for the SQLite adapter is a one-line change in the store and touches nothing else. Tests target the interface for this reason. Ids come from `id.ts` (`expo-crypto`'s RFC 4122 `randomUUID()`).
 - **`src/store/taskStore.ts`** owns the single `TaskService` instance. The store is a *cache* of the service: every action (`commit`/`complete`/`recommit`/`remove`/`sweep`) calls the service, then re-pulls `repository.getAll()` into `tasks`. It never trusts a status field. Note `jest-expo` mocks `expo-crypto`, so `TaskService` tests inject their own `generateId`/`now` via `TaskServiceOptions` rather than using the real (native, unmockable-in-Jest) sources.
-- **`src/ui/`** are stateless views. `TaskCard` re-derives status/countdown/progress from `now` at render — it holds no state.
+- **`src/store/themeStore.ts`** is a separate, unrelated `zustand` store — just `{ themeId, setThemeId }`. `src/ui/theme.ts`'s `useTheme()` hook reads it and combines it with the OS color scheme to produce the active `Palette`; components never read `themeId` directly.
+- **`src/ui/`** are stateless views. `TaskCard` re-derives status/countdown/progress from `now` at render — it holds no state. `App.tsx` itself holds the one piece of navigation state (`activeTab`) and renders `TimelineScreen` or `ProfileScreen` accordingly, plus the `TabBar`.
 
 ### Two things drive re-renders
 

@@ -6,6 +6,7 @@ import { Palette, ThemeId, useTheme } from './theme';
 const THEME_OPTIONS: { id: ThemeId; label: string; description: string }[] = [
   { id: 'default', label: 'Default', description: 'Follows your device light/dark setting.' },
   { id: 'brutalist', label: 'Brutalist Block', description: 'High-contrast paper & ink.' },
+  { id: 'lockIn', label: 'Lock In', description: 'Disciplined dark mode.' },
 ];
 
 export function ProfileScreen() {
