@@ -24,8 +24,12 @@ interface Props {
  * "can't be paused" note come straight from the mockup copy.
  */
 export function CommitModal({ visible, onClose, onCommit }: Props) {
-  const { colors, mono } = useTheme();
-  const styles = useMemo(() => makeStyles(colors, mono), [colors, mono]);
+  const { colors, themeId, mono } = useTheme();
+  const isBrutalist = themeId === 'brutalist';
+  const styles = useMemo(
+    () => makeStyles(colors, mono, isBrutalist),
+    [colors, mono, isBrutalist]
+  );
   const [title, setTitle] = useState('');
   const [error, setError] = useState<string | null>(null);
 
@@ -105,7 +109,7 @@ export function CommitModal({ visible, onClose, onCommit }: Props) {
   );
 }
 
-function makeStyles(colors: Palette, mono: string | undefined) {
+function makeStyles(colors: Palette, mono: string | undefined, isBrutalist: boolean) {
   return StyleSheet.create({
     backdrop: {
       flex: 1,
@@ -121,9 +125,9 @@ function makeStyles(colors: Palette, mono: string | undefined) {
     },
     sheet: {
       backgroundColor: colors.bgElevated,
-      borderTopLeftRadius: 28,
-      borderTopRightRadius: 28,
-      borderTopWidth: 1,
+      borderTopLeftRadius: isBrutalist ? 8 : 28,
+      borderTopRightRadius: isBrutalist ? 8 : 28,
+      borderTopWidth: isBrutalist ? 3 : 1,
       borderColor: colors.border,
       padding: 24,
       paddingBottom: 40,
@@ -143,8 +147,8 @@ function makeStyles(colors: Palette, mono: string | undefined) {
     input: {
       backgroundColor: colors.panel,
       borderColor: colors.border,
-      borderWidth: 1,
-      borderRadius: 14,
+      borderWidth: isBrutalist ? 2 : 1,
+      borderRadius: isBrutalist ? 6 : 14,
       padding: 16,
       fontSize: 16,
       color: colors.text,
@@ -152,8 +156,8 @@ function makeStyles(colors: Palette, mono: string | undefined) {
     clock: {
       backgroundColor: colors.panel,
       borderColor: colors.border,
-      borderWidth: 1,
-      borderRadius: 16,
+      borderWidth: isBrutalist ? 2 : 1,
+      borderRadius: isBrutalist ? 6 : 16,
       padding: 20,
       alignItems: 'center',
     },
@@ -184,10 +188,11 @@ function makeStyles(colors: Palette, mono: string | undefined) {
     },
     commitBtn: {
       backgroundColor: colors.accent,
-      borderRadius: 16,
+      borderRadius: isBrutalist ? 6 : 16,
       padding: 18,
       alignItems: 'center',
       marginTop: 4,
+      ...(isBrutalist ? { borderWidth: 2, borderColor: colors.border } : null),
     },
     commitBtnText: {
       color: colors.bg,

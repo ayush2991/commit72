@@ -1,8 +1,10 @@
 import { Platform, useColorScheme } from 'react-native';
 import { useMemo } from 'react';
 import { TaskStatus } from '../task/types';
+import { useThemeStore } from '../store/themeStore';
 
 export type Scheme = 'light' | 'dark';
+export type ThemeId = 'default' | 'brutalist';
 
 export interface Palette {
   bg: string;
@@ -93,6 +95,36 @@ const lightColors: Palette = {
   badgeUrgentBg: 'rgba(216,50,30,0.14)',
 };
 
+// Lifted from the "1e — BLOCK" mockup option (Commit72.dc.html): a fixed
+// high-contrast paper/ink look, not an OS light/dark variant.
+const brutalistColors: Palette = {
+  bg: '#e8e5dc',
+  bgElevated: '#ffffff',
+  panel: '#ffffff',
+  panel2: '#ded9cc',
+  border: '#111111',
+  text: '#111111',
+  textDim: '#5c5a53',
+  textFaint: '#8a8a8a',
+
+  fresh: '#4d4dff',
+  mid: '#00a86b',
+  urgent: '#ff3b19',
+  failed: '#8a8a8a',
+
+  accent: '#ff3b19',
+  backdrop: 'rgba(17,17,17,0.55)',
+  failedCardBg: '#ddd8cb',
+  failedCardBorder: '#3a3a3a',
+  trackBg: '#d9d4c6',
+  urgentBorderAlpha: 'rgba(255,59,25,0.5)',
+  badgeFailedText: '#5c5a53',
+
+  badgeFreshBg: 'rgba(77,77,255,0.16)',
+  badgeMidBg: 'rgba(0,168,107,0.16)',
+  badgeUrgentBg: 'rgba(255,59,25,0.18)',
+};
+
 const palettes: Record<Scheme, Palette> = { dark: darkColors, light: lightColors };
 
 export function makeStatusColor(p: Palette): Record<TaskStatus, string> {
@@ -116,17 +148,25 @@ export const mono = Platform.select({
   default: 'monospace',
 });
 
-/** Resolves the current OS appearance to a palette; defaults to dark when unknown. */
+/**
+ * Resolves the active theme. When the user has picked 'default' (the store's
+ * initial value), this follows the OS appearance as before. When they've
+ * picked 'brutalist', the fixed brutalistColors palette is used regardless of
+ * OS scheme.
+ */
 export function useTheme() {
-  const scheme: Scheme = useColorScheme() === 'light' ? 'light' : 'dark';
+  const themeId = useThemeStore((s) => s.themeId);
+  const osScheme: Scheme = useColorScheme() === 'light' ? 'light' : 'dark';
+  const scheme: Scheme = themeId === 'brutalist' ? 'light' : osScheme;
   return useMemo(() => {
-    const palette = palettes[scheme];
+    const palette = themeId === 'brutalist' ? brutalistColors : palettes[scheme];
     return {
       scheme,
+      themeId,
       colors: palette,
       statusColor: makeStatusColor(palette),
       badgeBg: makeBadgeBg(palette),
       mono,
     };
-  }, [scheme]);
+  }, [themeId, scheme]);
 }

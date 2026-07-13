@@ -16,8 +16,9 @@ import { TaskCard } from './TaskCard';
 import { Palette, useTheme } from './theme';
 
 export function TimelineScreen() {
-  const { colors } = useTheme();
-  const styles = useMemo(() => makeStyles(colors), [colors]);
+  const { colors, themeId } = useTheme();
+  const isBrutalist = themeId === 'brutalist';
+  const styles = useMemo(() => makeStyles(colors, isBrutalist), [colors, isBrutalist]);
   const tasks = useTaskStore((s) => s.tasks);
   const now = useTaskStore((s) => s.now);
   const commit = useTaskStore((s) => s.commit);
@@ -111,7 +112,7 @@ export function TimelineScreen() {
   );
 }
 
-function makeStyles(colors: Palette) {
+function makeStyles(colors: Palette, isBrutalist: boolean) {
   return StyleSheet.create({
     root: {
       flex: 1,
@@ -119,6 +120,9 @@ function makeStyles(colors: Palette) {
     },
     header: {
       marginBottom: 18,
+      ...(isBrutalist
+        ? { borderBottomWidth: 3, borderBottomColor: colors.border, paddingBottom: 12 }
+        : null),
     },
     title: {
       color: colors.text,
@@ -155,15 +159,27 @@ function makeStyles(colors: Palette) {
       bottom: 32,
       width: 56,
       height: 56,
-      borderRadius: 28,
+      borderRadius: isBrutalist ? 8 : 28,
       backgroundColor: colors.accent,
       alignItems: 'center',
       justifyContent: 'center',
-      shadowColor: colors.urgent,
-      shadowOpacity: 0.4,
-      shadowRadius: 12,
-      shadowOffset: { width: 0, height: 8 },
-      elevation: 8,
+      ...(isBrutalist
+        ? {
+            borderWidth: 2,
+            borderColor: colors.border,
+            shadowColor: colors.border,
+            shadowOffset: { width: 3, height: 3 },
+            shadowOpacity: 1,
+            shadowRadius: 0,
+            elevation: 8,
+          }
+        : {
+            shadowColor: colors.urgent,
+            shadowOpacity: 0.4,
+            shadowRadius: 12,
+            shadowOffset: { width: 0, height: 8 },
+            elevation: 8,
+          }),
     },
     fabText: {
       color: colors.bg,

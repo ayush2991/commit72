@@ -21,14 +21,27 @@ interface Props {
  * ticking `now` from the store animates it fresh → mid → urgent → failed.
  */
 export function TaskCard({ task, now }: Props) {
-  const { colors, statusColor, badgeBg, mono } = useTheme();
-  const styles = useMemo(() => makeStyles(colors, mono), [colors, mono]);
+  const { colors, themeId, statusColor, badgeBg, mono } = useTheme();
+  const isBrutalist = themeId === 'brutalist';
+  const styles = useMemo(
+    () => makeStyles(colors, mono, isBrutalist),
+    [colors, mono, isBrutalist]
+  );
   const status = deriveStatus(task, now);
   const color = statusColor[status];
   const pct = `${Math.round(progressFraction(task, now) * 100)}%` as const;
 
   const isFailed = status === 'failed';
   const isDone = status === 'done';
+  const isHot = status === 'urgent' || isFailed;
+
+  // The brutalist theme uses solid-color chips with ink text (mockup "1e"),
+  // rather than the default theme's tinted-background + colored-text badge,
+  // and only tints the countdown for hot statuses — everything else reads
+  // in plain ink.
+  const badgeBackground = isBrutalist ? color : badgeBg[status];
+  const badgeTextColor = isBrutalist ? colors.text : isFailed ? colors.badgeFailedText : color;
+  const countdownColor = isBrutalist ? (isHot ? color : colors.text) : color;
 
   return (
     <View
@@ -45,13 +58,8 @@ export function TaskCard({ task, now }: Props) {
         >
           {task.title}
         </Text>
-        <View style={[styles.badge, { backgroundColor: badgeBg[status] }]}>
-          <Text
-            style={[
-              styles.badgeText,
-              { color: isFailed ? colors.badgeFailedText : color },
-            ]}
-          >
+        <View style={[styles.badge, { backgroundColor: badgeBackground }]}>
+          <Text style={[styles.badgeText, { color: badgeTextColor }]}>
             {statusLabel(status)}
           </Text>
         </View>
@@ -63,7 +71,7 @@ export function TaskCard({ task, now }: Props) {
 
       <View style={styles.meta}>
         <Text style={styles.metaText}>{committedAgoText(task, now)}</Text>
-        <Text style={[styles.metaText, styles.countdown, { color }]}>
+        <Text style={[styles.metaText, styles.countdown, { color: countdownColor }]}>
           {countdownText(task, now)}
         </Text>
       </View>
@@ -71,17 +79,26 @@ export function TaskCard({ task, now }: Props) {
   );
 }
 
-function makeStyles(colors: Palette, mono: string | undefined) {
+function makeStyles(colors: Palette, mono: string | undefined, isBrutalist: boolean) {
   return StyleSheet.create({
     card: {
       backgroundColor: colors.panel,
       borderColor: colors.border,
-      borderWidth: 1,
-      borderRadius: 16,
+      borderWidth: isBrutalist ? 2 : 1,
+      borderRadius: isBrutalist ? 8 : 16,
       padding: 16,
+      ...(isBrutalist
+        ? {
+            shadowColor: colors.border,
+            shadowOffset: { width: 3, height: 3 },
+            shadowOpacity: 1,
+            shadowRadius: 0,
+            elevation: 4,
+          }
+        : null),
     },
     cardUrgent: {
-      borderColor: colors.urgentBorderAlpha,
+      borderColor: isBrutalist ? colors.border : colors.urgentBorderAlpha,
     },
     cardFailed: {
       backgroundColor: colors.failedCardBg,
@@ -108,7 +125,7 @@ function makeStyles(colors: Palette, mono: string | undefined) {
     badge: {
       paddingHorizontal: 8,
       paddingVertical: 4,
-      borderRadius: 6,
+      borderRadius: isBrutalist ? 0 : 6,
     },
     badgeText: {
       fontFamily: mono,
@@ -117,15 +134,17 @@ function makeStyles(colors: Palette, mono: string | undefined) {
       letterSpacing: 0.4,
     },
     track: {
-      height: 6,
+      height: isBrutalist ? 8 : 6,
       backgroundColor: colors.trackBg,
-      borderRadius: 99,
+      borderRadius: isBrutalist ? 2 : 99,
+      borderWidth: isBrutalist ? 2 : 0,
+      borderColor: colors.border,
       overflow: 'hidden',
       marginBottom: 8,
     },
     fill: {
       height: '100%',
-      borderRadius: 99,
+      borderRadius: isBrutalist ? 2 : 99,
     },
     meta: {
       flexDirection: 'row',

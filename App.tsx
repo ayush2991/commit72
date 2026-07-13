@@ -1,7 +1,9 @@
 import { StatusBar } from 'expo-status-bar';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { AppState, Platform, StatusBar as RNStatusBar, StyleSheet, View } from 'react-native';
 import { useTaskStore } from './src/store/taskStore';
+import { ProfileScreen } from './src/ui/ProfileScreen';
+import { Tab, TabBar, TAB_BAR_HEIGHT } from './src/ui/TabBar';
 import { TimelineScreen } from './src/ui/TimelineScreen';
 import { Palette, useTheme } from './src/ui/theme';
 
@@ -9,6 +11,7 @@ export default function App() {
   const { scheme, colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const sweep = useTaskStore((s) => s.sweep);
+  const [activeTab, setActiveTab] = useState<Tab>('timeline');
 
   useEffect(() => {
     // A ticking clock is what makes derived status live: deriveStatus is a pure
@@ -31,7 +34,10 @@ export default function App() {
 
   return (
     <View style={styles.container}>
-      <TimelineScreen />
+      <View style={styles.screen}>
+        {activeTab === 'timeline' ? <TimelineScreen /> : <ProfileScreen />}
+      </View>
+      <TabBar activeTab={activeTab} onChange={setActiveTab} />
       <StatusBar style={scheme === 'light' ? 'dark' : 'light'} />
     </View>
   );
@@ -44,6 +50,10 @@ function makeStyles(colors: Palette) {
       backgroundColor: colors.bg,
       paddingTop:
         Platform.OS === 'android' ? (RNStatusBar.currentHeight ?? 0) + 12 : 64,
+    },
+    screen: {
+      flex: 1,
+      paddingBottom: TAB_BAR_HEIGHT,
     },
   });
 }
