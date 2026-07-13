@@ -1,8 +1,9 @@
 import { useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { computeHealth, moodForHealth, PET_MOOD_COPY, PetMood } from '../pet/petHealth';
+import { computeHealth, moodForHealth, PetMood } from '../pet/petHealth';
+import { usePetSelectionStore } from '../store/petSelectionStore';
 import { usePetStore } from '../store/petStore';
-import { PipFace } from './PipFace';
+import { PET_DEFS } from './pets';
 import { Palette, useTheme } from './theme';
 
 interface Props {
@@ -31,9 +32,11 @@ export function PipCard({ live }: Props) {
   const isBrutalist = themeId === 'brutalist';
   const kept = usePetStore((s) => s.kept);
   const broken = usePetStore((s) => s.broken);
+  const petId = usePetSelectionStore((s) => s.petId);
+  const pet = PET_DEFS[petId];
   const health = computeHealth(kept, broken);
   const mood = moodForHealth(health);
-  const copy = PET_MOOD_COPY[mood];
+  const copy = pet.moodCopy[mood];
   const accent = moodColor(mood, colors);
   const styles = useMemo(
     () => makeStyles(colors, mono, isBrutalist),
@@ -43,13 +46,13 @@ export function PipCard({ live }: Props) {
   return (
     <View style={styles.card}>
       <View style={styles.faceWrap}>
-        <PipFace mood={mood} />
+        <pet.Face mood={mood} />
       </View>
       <Text style={[styles.moodLabel, { color: accent }]}>{copy.label.toUpperCase()}</Text>
       <Text style={styles.flavor}>{copy.flavor}</Text>
 
       <View style={styles.healthRow}>
-        <Text style={styles.healthLabel}>PIP&apos;S HEALTH</Text>
+        <Text style={styles.healthLabel}>{pet.name.toUpperCase()}&apos;S HEALTH</Text>
         <Text style={styles.healthValue}>{health} / 100</Text>
       </View>
       <View style={styles.track}>

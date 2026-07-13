@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useThemeStore } from '../store/themeStore';
+import { PetPicker } from './PetPicker';
 import { Palette, ThemeId, useTheme } from './theme';
 
 const THEME_OPTIONS: { id: ThemeId; label: string; description: string }[] = [
@@ -17,7 +18,7 @@ export function ProfileScreen() {
   const styles = useMemo(() => makeStyles(colors, isBrutalist), [colors, isBrutalist]);
 
   return (
-    <View style={styles.root}>
+    <ScrollView style={styles.root} contentContainerStyle={styles.rootContent}>
       <View style={styles.header}>
         <Text style={styles.title}>Profile</Text>
         <Text style={styles.sub}>Settings</Text>
@@ -44,7 +45,10 @@ export function ProfileScreen() {
           );
         })}
       </View>
-    </View>
+
+      <Text style={[styles.sectionLabel, styles.companionLabel]}>Companion</Text>
+      <PetPicker />
+    </ScrollView>
   );
 }
 
@@ -52,7 +56,10 @@ function makeStyles(colors: Palette, isBrutalist: boolean) {
   return StyleSheet.create({
     root: {
       flex: 1,
+    },
+    rootContent: {
       paddingHorizontal: 20,
+      paddingBottom: 24,
     },
     header: {
       marginBottom: 18,
@@ -78,6 +85,9 @@ function makeStyles(colors: Palette, isBrutalist: boolean) {
       letterSpacing: 0.8,
       textTransform: 'uppercase',
       marginBottom: 8,
+    },
+    companionLabel: {
+      marginTop: 22,
     },
     section: {
       backgroundColor: colors.panel,

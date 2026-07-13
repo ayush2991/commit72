@@ -1,8 +1,6 @@
 import { useMemo } from 'react';
-import { View } from 'react-native';
 import { PetMood } from '../pet/petHealth';
-
-const COLS = 16;
+import { PixelGrid } from './PixelGrid';
 
 // Rounded-blob silhouette, lifted pixel-for-pixel from the "PactPal" design
 // doc's drawPip() — '#' is a filled body pixel, shared across all moods.
@@ -159,24 +157,5 @@ interface Props {
 /** A small pixel-grid mascot face, hand-authored per mood (no image assets). */
 export function PipFace({ mood, size = 152 }: Props) {
   const grid = useMemo(() => buildGrid(mood), [mood]);
-  const cell = size / COLS;
-
-  return (
-    <View style={{ width: size, height: size }}>
-      {grid.map((row, r) => (
-        <View key={r} style={{ flexDirection: 'row' }}>
-          {row.map((color, c) => (
-            <View
-              key={c}
-              style={{
-                width: cell,
-                height: cell,
-                backgroundColor: color ?? 'transparent',
-              }}
-            />
-          ))}
-        </View>
-      ))}
-    </View>
-  );
+  return <PixelGrid grid={grid} size={size} />;
 }
