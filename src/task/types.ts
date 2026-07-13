@@ -1,6 +1,6 @@
 export const SEVENTY_TWO_HOURS_MS = 72 * 60 * 60 * 1000;
 
-export const DEFAULT_TASK_CAP = 5;
+export const DEFAULT_TASK_CAP = 6;
 
 // PRD §5.1 urgency bands: fresh <35% elapsed, mid 35-75%, urgent >=75%.
 export const URGENT_THRESHOLD = 0.75;

@@ -74,7 +74,7 @@ A separate `settings` table (or a single JSON row) holds: `notificationsEnabledG
 
 - `commit(title)` → rejects if `activeTaskCount >= taskCap`; else inserts row with `committedAt = now`, `deadlineAt = now + 72h`; schedules notifications.
 - `complete(taskId)` → sets `completedAt = now`; cancels any pending notifications for that task.
-- `recommit(taskId)` → only valid on a `failed` task; resets `committedAt = now`, `deadlineAt = now + 72h`, clears `failedAt`/`autoDeleteAt`, increments `recommitCount`; re-enters the active cap check (a re-commit counts against the 5-task cap like any active task).
+- `recommit(taskId)` → only valid on a `failed` task; resets `committedAt = now`, `deadlineAt = now + 72h`, clears `failedAt`/`autoDeleteAt`, increments `recommitCount`; re-enters the active cap check (a re-commit counts against the 6-task cap like any active task).
 - `deleteManually(taskId)` → valid on any task regardless of status; hard delete + cancel notifications.
 - `sweep(now)` → run on app foreground/resume and on a light interval while foregrounded: finds tasks that just crossed `deadlineAt` (stamps `failedAt`, schedules the "clock ran out" notification once) and tasks past `autoDeleteAt` (hard deletes them). This is what makes the local-timestamp model self-healing after the app has been closed.
 

@@ -32,7 +32,7 @@ The default view. Shows all currently active committed tasks as cards, each disp
 - Task title
 - An urgency state derived from elapsed time toward its own deadline: **Fresh** (<35% elapsed), **In Progress** (35–75%), **Urgent** (75–100%), **Failed** (≥100%, incomplete)
 - A per-task progress bar and a countdown ("Xh left")
-- A floating action button to start a new commitment, disabled/hidden once the user has 5 active commitments (the v1 cap — see Decisions)
+- A floating action button to start a new commitment, disabled/hidden once the user has 6 active commitments (the v1 cap — see Decisions)
 
 Design intent: urgency should be immediately readable through color and motion, not just numbers — this screen is the emotional core of the app.
 
@@ -42,7 +42,7 @@ The entry point for creating a new commitment:
 - A prominent "72:00" countdown preview, reinforcing that the clock starts immediately on commit
 - Explicit copy stating the commitment cannot be paused, extended, or rescheduled
 - A single confirm action: "Commit for 72 Hours"
-- If the user is already at the 5-task cap, this flow should make that constraint clear rather than silently failing
+- If the user is already at the 6-task cap, this flow should make that constraint clear rather than silently failing
 
 Design intent: this should read as a deliberate, slightly weighty action — not a quick-add text field.
 
@@ -62,7 +62,7 @@ A static/interactive HTML mockup covering all three screens (with viewport, acce
 
 ## 7. Decisions
 
-- **Task cap**: 5 simultaneously active commitments, as a starting point. Not validated against real usage yet — treat as adjustable, not final.
+- **Task cap**: 6 simultaneously active commitments, as a starting point. Not validated against real usage yet — treat as adjustable, not final.
 - **Notifications**: supported, user-controlled. Users can enable/disable push notifications (e.g. as a clock approaches expiry); default on/off state still TBD.
 - **Failed-task lifecycle**: once a task fails, the user has 72 hours to either re-commit (starts a fresh 72h clock) or it is automatically deleted. A user can also manually delete any task — active or failed — at any time. This bounds how long failed tasks linger and keeps the failed-state list from growing unbounded.
 - **Platform**: targeting both iOS and Android. Exact implementation approach (native per-platform vs. cross-platform framework) not yet decided.
@@ -71,7 +71,7 @@ A static/interactive HTML mockup covering all three screens (with viewport, acce
 ## 8. Open Questions (still unresolved)
 
 - Default on/off state for notifications, and which events trigger them (e.g. only "approaching deadline," or also "just failed," "auto-deleted").
-- Whether the 5-task cap should differ once the v2 sharing feature exists (e.g. does a shared list have different constraints).
+- Whether the 6-task cap should differ once the v2 sharing feature exists (e.g. does a shared list have different constraints).
 - Native vs. cross-platform framework decision for iOS/Android.
 - Failed-task-at-scale: even with 72h auto-deletion, is a review/reflection surface needed, or is the per-task detail screen sufficient?
 
