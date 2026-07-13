@@ -80,7 +80,14 @@ export class TaskService {
     if (task.completedAt !== null) {
       return task; // idempotent
     }
-    const updated: Task = { ...task, completedAt: this.now() };
+    const now = this.now();
+    const status = deriveStatus(task, now);
+    if (status === 'failed') {
+      throw new InvalidTaskTransitionError(
+        `Cannot complete a task with status "${status}"`
+      );
+    }
+    const updated: Task = { ...task, completedAt: now };
     this.repository.update(updated);
     return updated;
   }

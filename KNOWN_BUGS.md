@@ -27,24 +27,7 @@ query) to the interface **before** the SQLite adapter freezes the contract.
 
 **Severity:** Design smell / future performance. Not a runtime bug today.
 
-## 2. `complete()` has no lifecycle guard and leaves stale failure timestamps
-
-**Where:** `TaskService.complete`, `src/task/taskService.ts`.
-
-**Problem:** `complete` sets `completedAt` if unset but never checks status and
-never clears `failedAt` / `autoDeleteAt`. Completing an already-failed task
-yields a row with `completedAt` **and** `failedAt` both set (plus a live
-`autoDeleteAt`). `deriveStatus` checks `completedAt` first so it still reads as
-`done`, but the persisted record is self-contradictory. This is inconsistent
-with `recommit`, which strictly rejects any status that isn't `failed`.
-
-**Fix direction:** Decide the intent explicitly. Either (a) allow completing a
-failed task and clear `failedAt`/`autoDeleteAt` in the update to keep the row
-coherent, or (b) guard it like `recommit` does.
-
-**Severity:** Data-hygiene / latent. Renders correctly today.
-
-## 3. `InMemoryTaskRepository.getAll()` leaks internal object references
+## 2. `InMemoryTaskRepository.getAll()` leaks internal object references
 
 **Where:** `InMemoryTaskRepository.getAll`, `src/task/taskRepository.ts`.
 

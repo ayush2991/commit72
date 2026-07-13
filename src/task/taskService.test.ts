@@ -85,6 +85,13 @@ describe('TaskService.complete', () => {
     const { service } = makeService();
     expect(() => service.complete('nope')).toThrow(TaskNotFoundError);
   });
+
+  it('throws an InvalidTaskTransitionError if the task is failed (expired)', () => {
+    const { service, setNow } = makeService({ now: 0 });
+    const task = service.commit('Do not finish in time');
+    setNow(SEVENTY_TWO_HOURS_MS + 1); // past the 72h window
+    expect(() => service.complete(task.id)).toThrow(InvalidTaskTransitionError);
+  });
 });
 
 describe('TaskService.sweep', () => {
