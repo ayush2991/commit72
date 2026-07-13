@@ -18,11 +18,15 @@ Not yet built: navigation (there is no `react-navigation` yet — the Commit and
 ## Commands
 
 - `npm start` — Expo dev server (then pick a platform from the CLI menu).
-- `npm run ios` / `npm run android` / `npm run web` — target a platform directly. `web` renders via `react-native-web` (installed) and is the fastest way to eyeball the UI without a simulator; note web maps `Alert.alert` to `window.confirm` and no-ops `KeyboardAvoidingView`, so use `ios` for true-to-mockup fidelity.
+- `npm run ios` / `npm run android` / `npm run web` — target a platform directly. `ios`/`android` run `expo run:ios`/`expo run:android` — a **native build** (prebuilds and compiles via Xcode/Gradle), not just the Metro dev server, so they need Xcode/Android Studio installed and, for Android, JDK 17 (see below). `web` renders via `react-native-web` (installed) and is the fastest way to eyeball the UI without a simulator or native toolchain; note web maps `Alert.alert` to `window.confirm` and no-ops `KeyboardAvoidingView`, so use `ios` for true-to-mockup fidelity.
 - `npm test` — Jest (`jest-expo` preset). Single file: `npm test -- src/task/taskService.test.ts`.
 - `npx tsc --noEmit` — typecheck.
 
 No lint config is set up yet.
+
+### Native Android/iOS builds require JDK 17
+
+Building a native APK (`npx expo prebuild` + `./android/gradlew assembleRelease`, or `expo run:android`) **must use JDK 17** — set `JAVA_HOME=/opt/homebrew/opt/openjdk@17` for the build. A newer JDK (24+) fails the CMake configure step (`:app:configureCMakeRelWithDebInfo` → `WARNING: A restricted method in java.lang.System has been called`) because JEP 472 restricts the native-method calls the RN/Expo native build relies on. If Gradle was previously run under another JDK, stop the stale daemon first (`./android/gradlew --stop`). The Metro/QR-code dev flow (`npm start`, Expo Go) does not need the JDK and is unaffected. The built release APK lives at `android/app/build/outputs/apk/release/app-release.apk`; install with `adb install -r`.
 
 ### Dev clock
 
