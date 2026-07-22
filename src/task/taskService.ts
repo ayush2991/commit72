@@ -178,7 +178,7 @@ export class TaskService {
   }
 
   private getOrThrow(taskId: string): Task {
-    const task = this.repository.getAll().find((t) => t.id === taskId);
+    const task = this.repository.getById(taskId);
     if (!task) {
       throw new TaskNotFoundError(taskId);
     }
