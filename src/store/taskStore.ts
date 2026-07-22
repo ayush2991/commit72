@@ -58,7 +58,7 @@ export const useTaskStore = create<TaskStore>((set) => {
     complete: (id) => {
       // Pip only credits a fresh completion — complete() is idempotent, so
       // re-tapping an already-done task must not inflate the kept count.
-      const alreadyDone = repository.getAll().find((t) => t.id === id)?.completedAt != null;
+      const alreadyDone = repository.getById(id)?.completedAt != null;
       service.complete(id);
       sync();
       if (!alreadyDone) usePetStore.getState().recordKept();

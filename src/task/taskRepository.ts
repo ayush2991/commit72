@@ -7,6 +7,7 @@ import { Task } from './types';
  */
 export interface TaskRepository {
   getAll(): Task[];
+  getById(id: string): Task | undefined;
   insert(task: Task): void;
   update(task: Task): void;
   delete(id: string): void;
@@ -17,6 +18,11 @@ export class InMemoryTaskRepository implements TaskRepository {
 
   getAll(): Task[] {
     return Array.from(this.tasks.values());
+  }
+
+  getById(id: string): Task | undefined {
+    const task = this.tasks.get(id);
+    return task ? { ...task } : undefined;
   }
 
   insert(task: Task): void {
