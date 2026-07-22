@@ -17,7 +17,7 @@ export class InMemoryTaskRepository implements TaskRepository {
   private tasks = new Map<string, Task>();
 
   getAll(): Task[] {
-    return Array.from(this.tasks.values());
+    return Array.from(this.tasks.values()).map((t) => ({ ...t }));
   }
 
   getById(id: string): Task | undefined {
