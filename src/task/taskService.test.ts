@@ -89,6 +89,7 @@ describe('TaskService.complete', () => {
     setNow(500);
     const completed = service.complete(task.id);
     expect(completed.completedAt).toBe(500);
+    expect(completed.autoDeleteAt).toBe(500 + SEVENTY_TWO_HOURS_MS);
 
     setNow(999);
     const completedAgain = service.complete(task.id);
@@ -178,17 +179,55 @@ describe('TaskService.sweep', () => {
     expect(repository.getAll()).toHaveLength(0);
   });
 
-  it('never touches a completed task, even long past its deadline', () => {
+  it('does not delete a completed task before its retention window elapses', () => {
     const { service, repository, setNow } = makeService({ now: 0 });
     const task = service.commit('Done early');
+    setNow(500);
     service.complete(task.id);
 
-    setNow(SEVENTY_TWO_HOURS_MS * 10);
+    setNow(500 + SEVENTY_TWO_HOURS_MS - 1);
     const result = service.sweep();
 
     expect(result.failed).toHaveLength(0);
     expect(result.deleted).toHaveLength(0);
     expect(repository.getAll()[0].completedAt).not.toBeNull();
+  });
+
+  it('auto-deletes a completed task once its retention window elapses', () => {
+    const { service, repository, setNow } = makeService({ now: 0 });
+    const task = service.commit('Done early');
+    setNow(500);
+    service.complete(task.id);
+
+    setNow(500 + SEVENTY_TWO_HOURS_MS);
+    const result = service.sweep();
+
+    expect(result.deleted.map((t) => t.id)).toEqual([task.id]);
+    expect(result.failed).toHaveLength(0);
+    expect(repository.getAll()).toHaveLength(0);
+  });
+
+  it('anchors a completed task retention window to completedAt, not commit or sweep time', () => {
+    const { service, setNow } = makeService({ now: 0 });
+    const task = service.commit('Slow to finish');
+    setNow(1000);
+    const completed = service.complete(task.id);
+    expect(completed.autoDeleteAt).toBe(1000 + SEVENTY_TWO_HOURS_MS);
+  });
+
+  it('is idempotent once a completed task has been auto-deleted', () => {
+    const { service, repository, setNow } = makeService({ now: 0 });
+    const task = service.commit('Done early');
+    service.complete(task.id);
+
+    setNow(SEVENTY_TWO_HOURS_MS);
+    service.sweep();
+    expect(repository.getAll()).toHaveLength(0);
+
+    setNow(SEVENTY_TWO_HOURS_MS * 2);
+    const result = service.sweep();
+    expect(result.deleted).toHaveLength(0);
+    expect(repository.getAll()).toHaveLength(0);
   });
 });
 

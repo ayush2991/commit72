@@ -99,7 +99,14 @@ export class TaskService {
         `Cannot complete a task with status "${status}"`
       );
     }
-    const updated: Task = { ...task, completedAt: now };
+    // Retention starts immediately, same as a failed task's grace period is
+    // anchored the moment sweep() notices the deadline passed — a done task
+    // gets the same windowMs before it's cleaned up.
+    const updated: Task = {
+      ...task,
+      completedAt: now,
+      autoDeleteAt: now + this.windowMs,
+    };
     this.repository.update(updated);
     return updated;
   }
@@ -141,13 +148,24 @@ export class TaskService {
    * no background-fetch task in v1). Self-healing: produces correct state
    * even after the app was closed for days, since it re-derives everything
    * from stored timestamps rather than relying on timers having fired.
+   *
+   * Retires done and failed tasks alike once their retention window
+   * (autoDeleteAt) elapses, so neither kind lingers in the list forever.
    */
   sweep(now: number = this.now()): SweepResult {
     const failed: Task[] = [];
     const deleted: Task[] = [];
 
     for (const stored of this.repository.getAll()) {
-      if (stored.completedAt !== null) continue;
+      if (stored.completedAt !== null) {
+        const pastRetention =
+          stored.autoDeleteAt !== null && now >= stored.autoDeleteAt;
+        if (pastRetention) {
+          this.repository.delete(stored.id);
+          deleted.push(stored);
+        }
+        continue;
+      }
 
       // Anchor failure to the deadline (a past fact), never to sweep time (an
       // observation). Otherwise opening the app late would restart the grace
