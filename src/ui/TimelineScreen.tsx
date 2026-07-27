@@ -8,7 +8,7 @@ import { ConfirmAction, ConfirmModal } from './ConfirmModal';
 import { sortForTimeline } from './format';
 import { PipCard } from './PipCard';
 import { TaskCard } from './TaskCard';
-import { Palette, useTheme } from './theme';
+import { Palette, ThemeType, useTheme } from './theme';
 
 interface TaskActionSheet {
   task: Task;
@@ -18,8 +18,8 @@ interface TaskActionSheet {
 }
 
 export function TimelineScreen() {
-  const { colors, isBrutalist } = useTheme();
-  const styles = useMemo(() => makeStyles(colors, isBrutalist), [colors, isBrutalist]);
+  const { colors, shape, type } = useTheme();
+  const styles = useMemo(() => makeStyles(colors, shape.hardEdges, type), [colors, shape, type]);
   const tasks = useTaskStore((s) => s.tasks);
   const now = useTaskStore((s) => s.now);
   const commit = useTaskStore((s) => s.commit);
@@ -146,7 +146,7 @@ export function TimelineScreen() {
   );
 }
 
-function makeStyles(colors: Palette, isBrutalist: boolean) {
+function makeStyles(colors: Palette, hardEdges: boolean, type: ThemeType) {
   return StyleSheet.create({
     root: {
       flex: 1,
@@ -154,15 +154,17 @@ function makeStyles(colors: Palette, isBrutalist: boolean) {
     },
     header: {
       marginBottom: 18,
-      ...(isBrutalist
+      ...(hardEdges
         ? { borderBottomWidth: 3, borderBottomColor: colors.border, paddingBottom: 12 }
         : null),
     },
     title: {
       color: colors.text,
+      fontFamily: type.display,
       fontSize: 26,
-      fontWeight: '800',
-      letterSpacing: -0.5,
+      fontWeight: type.titleWeight,
+      letterSpacing: type.titleTracking,
+      textTransform: type.titleCase,
     },
     sub: {
       color: colors.textDim,
@@ -193,11 +195,11 @@ function makeStyles(colors: Palette, isBrutalist: boolean) {
       bottom: 32,
       width: 56,
       height: 56,
-      borderRadius: isBrutalist ? 8 : 28,
+      borderRadius: hardEdges ? 8 : 28,
       backgroundColor: colors.accent,
       alignItems: 'center',
       justifyContent: 'center',
-      ...(isBrutalist
+      ...(hardEdges
         ? {
             borderWidth: 2,
             borderColor: colors.border,

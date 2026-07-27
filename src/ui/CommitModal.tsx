@@ -29,10 +29,11 @@ interface Props {
  * "can't be paused" note come straight from the mockup copy.
  */
 export function CommitModal({ visible, onClose, onCommit }: Props) {
-  const { colors, mono, radius, isBrutalist } = useTheme();
+  const { colors, mono, shape } = useTheme();
+  const { radius, hardEdges } = shape;
   const styles = useMemo(
-    () => makeStyles(colors, mono, radius, isBrutalist),
-    [colors, mono, radius, isBrutalist]
+    () => makeStyles(colors, mono, radius, hardEdges),
+    [colors, mono, radius, hardEdges]
   );
   const [title, setTitle] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -148,7 +149,7 @@ function makeStyles(
   colors: Palette,
   mono: string | undefined,
   radius: RadiusScale,
-  isBrutalist: boolean
+  hardEdges: boolean
 ) {
   return StyleSheet.create({
     backdrop: {
@@ -167,7 +168,7 @@ function makeStyles(
       backgroundColor: colors.bgElevated,
       borderTopLeftRadius: radius.sheet,
       borderTopRightRadius: radius.sheet,
-      borderTopWidth: isBrutalist ? 3 : 1,
+      borderTopWidth: hardEdges ? 3 : 1,
       borderColor: colors.border,
       padding: 24,
       paddingBottom: 40,
@@ -187,7 +188,7 @@ function makeStyles(
     input: {
       backgroundColor: colors.panel,
       borderColor: colors.border,
-      borderWidth: isBrutalist ? 2 : 1,
+      borderWidth: hardEdges ? 2 : 1,
       borderRadius: radius.field,
       padding: 16,
       fontSize: 16,
@@ -201,7 +202,7 @@ function makeStyles(
       flex: 1,
       backgroundColor: colors.panel,
       borderColor: colors.border,
-      borderWidth: isBrutalist ? 2 : 1,
+      borderWidth: hardEdges ? 2 : 1,
       borderRadius: radius.field,
       paddingVertical: 12,
       alignItems: 'center',
@@ -221,7 +222,7 @@ function makeStyles(
     clock: {
       backgroundColor: colors.panel,
       borderColor: colors.border,
-      borderWidth: isBrutalist ? 2 : 1,
+      borderWidth: hardEdges ? 2 : 1,
       borderRadius: radius.box,
       padding: 20,
       alignItems: 'center',
@@ -257,7 +258,7 @@ function makeStyles(
       padding: 18,
       alignItems: 'center',
       marginTop: 4,
-      ...(isBrutalist ? { borderWidth: 2, borderColor: colors.border } : null),
+      ...(hardEdges ? { borderWidth: 2, borderColor: colors.border } : null),
     },
     commitBtnText: {
       color: colors.bg,

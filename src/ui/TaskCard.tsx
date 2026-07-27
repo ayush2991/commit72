@@ -8,7 +8,7 @@ import {
   progressFraction,
   statusLabel,
 } from './format';
-import { Palette, useTheme } from './theme';
+import { Palette, ThemeShape, ThemeType, useTheme } from './theme';
 
 interface Props {
   task: Task;
@@ -21,11 +21,10 @@ interface Props {
  * ticking `now` from the store animates it fresh → mid → urgent → failed.
  */
 export function TaskCard({ task, now }: Props) {
-  const { colors, themeId, statusColor, badgeBg, mono } = useTheme();
-  const isBrutalist = themeId === 'brutalist';
+  const { colors, statusColor, badgeBg, mono, shape, type } = useTheme();
   const styles = useMemo(
-    () => makeStyles(colors, mono, isBrutalist),
-    [colors, mono, isBrutalist]
+    () => makeStyles(colors, mono, shape, type),
+    [colors, mono, shape, type]
   );
   const status = deriveStatus(task, now);
   const color = statusColor[status];
@@ -35,13 +34,16 @@ export function TaskCard({ task, now }: Props) {
   const isDone = status === 'done';
   const isHot = status === 'urgent' || isFailed;
 
-  // The brutalist theme uses solid-color chips with ink text (mockup "1e"),
-  // rather than the default theme's tinted-background + colored-text badge,
-  // and only tints the countdown for hot statuses — everything else reads
-  // in plain ink.
-  const badgeBackground = isBrutalist ? color : badgeBg[status];
-  const badgeTextColor = isBrutalist ? colors.text : isFailed ? colors.badgeFailedText : color;
-  const countdownColor = isBrutalist ? (isHot ? color : colors.text) : color;
+  // Hard-edged themes (Brutalist, Terminal) use solid-color chips with ink
+  // text, rather than the default theme's tinted-background + colored-text
+  // badge, and only tint the countdown for hot statuses — everything else
+  // reads in plain ink.
+  const badgeBackground = shape.hardEdges ? color : badgeBg[status];
+  const badgeTextColor = shape.hardEdges ? colors.text : isFailed ? colors.badgeFailedText : color;
+  const countdownColor = shape.hardEdges ? (isHot ? color : colors.text) : color;
+  const badgeLabel = `${type.badgeDecoration?.prefix ?? ''}${statusLabel(status)}${
+    type.badgeDecoration?.suffix ?? ''
+  }`;
 
   return (
     <View
@@ -59,9 +61,7 @@ export function TaskCard({ task, now }: Props) {
           {task.title}
         </Text>
         <View style={[styles.badge, { backgroundColor: badgeBackground }]}>
-          <Text style={[styles.badgeText, { color: badgeTextColor }]}>
-            {statusLabel(status)}
-          </Text>
+          <Text style={[styles.badgeText, { color: badgeTextColor }]}>{badgeLabel}</Text>
         </View>
       </View>
 
@@ -79,15 +79,16 @@ export function TaskCard({ task, now }: Props) {
   );
 }
 
-function makeStyles(colors: Palette, mono: string | undefined, isBrutalist: boolean) {
+function makeStyles(colors: Palette, mono: string | undefined, shape: ThemeShape, type: ThemeType) {
+  const hardEdges = shape.hardEdges;
   return StyleSheet.create({
     card: {
       backgroundColor: colors.panel,
       borderColor: colors.border,
-      borderWidth: isBrutalist ? 2 : 1,
-      borderRadius: isBrutalist ? 8 : 16,
+      borderWidth: hardEdges ? 2 : 1,
+      borderRadius: hardEdges ? 8 : 16,
       padding: 16,
-      ...(isBrutalist
+      ...(hardEdges
         ? {
             shadowColor: colors.border,
             shadowOffset: { width: 3, height: 3 },
@@ -98,7 +99,7 @@ function makeStyles(colors: Palette, mono: string | undefined, isBrutalist: bool
         : null),
     },
     cardUrgent: {
-      borderColor: isBrutalist ? colors.border : colors.urgentBorderAlpha,
+      borderColor: hardEdges ? colors.border : colors.urgentBorderAlpha,
     },
     cardFailed: {
       backgroundColor: colors.failedCardBg,
@@ -114,6 +115,7 @@ function makeStyles(colors: Palette, mono: string | undefined, isBrutalist: bool
     title: {
       flex: 1,
       color: colors.text,
+      fontFamily: type.body,
       fontSize: 15.5,
       fontWeight: '600',
       lineHeight: 20,
@@ -125,7 +127,7 @@ function makeStyles(colors: Palette, mono: string | undefined, isBrutalist: bool
     badge: {
       paddingHorizontal: 8,
       paddingVertical: 4,
-      borderRadius: isBrutalist ? 0 : 6,
+      borderRadius: hardEdges ? 0 : 6,
     },
     badgeText: {
       fontFamily: mono,
@@ -134,17 +136,17 @@ function makeStyles(colors: Palette, mono: string | undefined, isBrutalist: bool
       letterSpacing: 0.4,
     },
     track: {
-      height: isBrutalist ? 8 : 6,
+      height: hardEdges ? 8 : 6,
       backgroundColor: colors.trackBg,
-      borderRadius: isBrutalist ? 2 : 99,
-      borderWidth: isBrutalist ? 2 : 0,
+      borderRadius: hardEdges ? 2 : 99,
+      borderWidth: hardEdges ? 2 : 0,
       borderColor: colors.border,
       overflow: 'hidden',
       marginBottom: 8,
     },
     fill: {
       height: '100%',
-      borderRadius: isBrutalist ? 2 : 99,
+      borderRadius: hardEdges ? 2 : 99,
     },
     meta: {
       flexDirection: 'row',

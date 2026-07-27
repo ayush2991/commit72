@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { usePetSelectionStore } from '../store/petSelectionStore';
 import { ALL_MOODS, PET_LIST, PetId } from './pets';
-import { Palette, useTheme } from './theme';
+import { Palette, ThemeShape, ThemeType, useTheme } from './theme';
 
 const MOOD_LABELS: Record<(typeof ALL_MOODS)[number], string> = {
   thriving: 'THRIVING',
@@ -13,14 +13,13 @@ const MOOD_LABELS: Record<(typeof ALL_MOODS)[number], string> = {
 };
 
 export function PetPicker() {
-  const { colors, mono, themeId } = useTheme();
-  const isBrutalist = themeId === 'brutalist';
+  const { colors, mono, shape, type } = useTheme();
   const petId = usePetSelectionStore((s) => s.petId);
   const setPetId = usePetSelectionStore((s) => s.setPetId);
   // The pet you're currently looking at need not be the committed one yet —
   // tapping a row both selects it and switches this preview to it.
   const [exploringId, setExploringId] = useState<PetId>(petId);
-  const styles = useMemo(() => makeStyles(colors, mono, isBrutalist), [colors, mono, isBrutalist]);
+  const styles = useMemo(() => makeStyles(colors, mono, shape, type), [colors, mono, shape, type]);
 
   const exploring = PET_LIST.find((p) => p.id === exploringId) ?? PET_LIST[0];
 
@@ -68,15 +67,16 @@ export function PetPicker() {
   );
 }
 
-function makeStyles(colors: Palette, mono: string | undefined, isBrutalist: boolean) {
+function makeStyles(colors: Palette, mono: string | undefined, shape: ThemeShape, type: ThemeType) {
+  const hardEdges = shape.hardEdges;
   return StyleSheet.create({
     section: {
       backgroundColor: colors.panel,
       borderColor: colors.border,
-      borderWidth: isBrutalist ? 2 : 1,
-      borderRadius: isBrutalist ? 8 : 16,
+      borderWidth: hardEdges ? 2 : 1,
+      borderRadius: hardEdges ? 8 : 16,
       overflow: 'hidden',
-      ...(isBrutalist
+      ...(hardEdges
         ? {
             shadowColor: colors.border,
             shadowOffset: { width: 3, height: 3 },
@@ -106,6 +106,7 @@ function makeStyles(colors: Palette, mono: string | undefined, isBrutalist: bool
     },
     rowLabel: {
       color: colors.text,
+      fontFamily: type.body,
       fontSize: 15.5,
       fontWeight: '600',
     },
@@ -143,8 +144,8 @@ function makeStyles(colors: Palette, mono: string | undefined, isBrutalist: bool
     previewFaceWrap: {
       backgroundColor: colors.panel,
       borderColor: colors.border,
-      borderWidth: isBrutalist ? 2 : 1,
-      borderRadius: isBrutalist ? 6 : 14,
+      borderWidth: hardEdges ? 2 : 1,
+      borderRadius: hardEdges ? 6 : 14,
       padding: 4,
     },
     previewLabel: {

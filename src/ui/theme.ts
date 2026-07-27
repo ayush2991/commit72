@@ -1,10 +1,10 @@
-import { Platform, useColorScheme } from 'react-native';
+import { Platform, TextStyle, useColorScheme } from 'react-native';
 import { useMemo } from 'react';
 import { TaskStatus } from '../task/types';
 import { useThemeStore } from '../store/themeStore';
 
 export type Scheme = 'light' | 'dark';
-export type ThemeId = 'default' | 'brutalist' | 'lockIn';
+export type ThemeId = 'default' | 'brutalist' | 'neonArcade' | 'sunrise' | 'terminal';
 
 export interface Palette {
   bg: string;
@@ -125,36 +125,94 @@ const brutalistColors: Palette = {
   badgeUrgentBg: 'rgba(255,59,25,0.18)',
 };
 
-// Lifted from the "1a — LOCK IN" mockup option (Commit72.dc.html /
-// PactPal.dc.html): a fixed disciplined-dark look, distinct from the
-// OS-driven default dark palette above (different status hues — active
-// tasks read blue "fresh" / green "mid" here, not green/yellow).
-const lockInColors: Palette = {
-  bg: '#0a0a0b',
-  bgElevated: '#0e0e11',
-  panel: '#151517',
-  panel2: '#1b1d23',
-  border: '#222226',
-  text: '#f5f5f4',
-  textDim: '#6b6b70',
-  textFaint: '#5c5a63',
+// Deep purple-black void with magenta/cyan neon accents — an arcade-cabinet
+// mood, deliberately far from the neutral grays of the default dark theme.
+const neonArcadeColors: Palette = {
+  bg: '#0b0014',
+  bgElevated: '#120022',
+  panel: '#1a0330',
+  panel2: '#24044a',
+  border: '#3d0a6b',
+  text: '#f5eaff',
+  textDim: '#b9a4d9',
+  textFaint: '#7c6a99',
 
-  fresh: '#64d2ff',
-  mid: '#30d158',
-  urgent: '#ff453a',
-  failed: '#8e8e93',
+  fresh: '#39ff9e',
+  mid: '#ffe14d',
+  urgent: '#ff2e88',
+  failed: '#6f6180',
 
-  accent: '#ff453a',
-  backdrop: 'rgba(0,0,0,0.6)',
-  failedCardBg: '#151517',
-  failedCardBorder: '#2a2a2e',
-  trackBg: '#26262a',
-  urgentBorderAlpha: 'rgba(255,69,58,0.5)',
-  badgeFailedText: '#8c8e94',
+  accent: '#ff2e88',
+  backdrop: 'rgba(10,0,20,0.65)',
+  failedCardBg: '#180226',
+  failedCardBorder: '#3d0a6b',
+  trackBg: '#24044a',
+  urgentBorderAlpha: 'rgba(255,46,136,0.5)',
+  badgeFailedText: '#b9a4d9',
 
-  badgeFreshBg: 'rgba(100,210,255,0.15)',
-  badgeMidBg: 'rgba(48,209,88,0.15)',
-  badgeUrgentBg: 'rgba(255,69,58,0.18)',
+  badgeFreshBg: 'rgba(57,255,158,0.16)',
+  badgeMidBg: 'rgba(255,225,77,0.16)',
+  badgeUrgentBg: 'rgba(255,46,136,0.2)',
+};
+
+// Warm cream/peach with coral + teal accents — optimistic morning light,
+// distinct from Brutalist's stark paper/ink.
+const sunriseColors: Palette = {
+  bg: '#fff3ea',
+  bgElevated: '#ffffff',
+  panel: '#fffaf5',
+  panel2: '#ffe9d6',
+  border: '#f3c9a8',
+  text: '#3a2a20',
+  textDim: '#8a6f5c',
+  textFaint: '#b89a82',
+
+  fresh: '#2a9d8f',
+  mid: '#e9a13b',
+  urgent: '#e8613f',
+  failed: '#b8a190',
+
+  accent: '#e8613f',
+  backdrop: 'rgba(58,42,32,0.35)',
+  failedCardBg: '#f6e6d8',
+  failedCardBorder: '#e3c3a0',
+  trackBg: '#ffe9d6',
+  urgentBorderAlpha: 'rgba(232,97,63,0.35)',
+  badgeFailedText: '#8a6f5c',
+
+  badgeFreshBg: 'rgba(42,157,143,0.14)',
+  badgeMidBg: 'rgba(233,161,59,0.16)',
+  badgeUrgentBg: 'rgba(232,97,63,0.16)',
+};
+
+// Pure-black CRT terminal — monochrome phosphor green with a single red
+// alarm hue, sharp corners, monospace throughout.
+const terminalColors: Palette = {
+  bg: '#000000',
+  bgElevated: '#050a05',
+  panel: '#0a120a',
+  panel2: '#0f1c0f',
+  border: '#1c3d1c',
+  text: '#baffc9',
+  textDim: '#5ea86e',
+  textFaint: '#3d5c3d',
+
+  fresh: '#33ff66',
+  mid: '#99ff33',
+  urgent: '#ff3333',
+  failed: '#3d5c3d',
+
+  accent: '#ff3333',
+  backdrop: 'rgba(0,0,0,0.7)',
+  failedCardBg: '#050a05',
+  failedCardBorder: '#1c3d1c',
+  trackBg: '#0f1c0f',
+  urgentBorderAlpha: 'rgba(255,51,51,0.5)',
+  badgeFailedText: '#5ea86e',
+
+  badgeFreshBg: 'rgba(51,255,102,0.15)',
+  badgeMidBg: 'rgba(153,255,51,0.15)',
+  badgeUrgentBg: 'rgba(255,51,51,0.2)',
 };
 
 const palettes: Record<Scheme, Palette> = { dark: darkColors, light: lightColors };
@@ -180,10 +238,18 @@ export const mono = Platform.select({
   default: 'monospace',
 });
 
+// A built-in condensed system stack (no bundled font) for Neon Arcade's
+// marquee-style title: iOS/Android both ship a condensed system face, this
+// is the closest widely-available web equivalent for parity in tooling.
+const condensedDisplay = 'Arial Narrow, "Helvetica Neue Condensed", sans-serif';
+
+// A built-in serif stack (no bundled font) for Sunrise's warm editorial feel.
+const serifDisplay = 'Georgia, "Iowan Old Style", "Times New Roman", serif';
+
 /**
  * Shared shape/spacing tokens so sheets, cards, and buttons across the app
  * (CommitModal, ConfirmModal, TaskCard, ...) agree on the same radii instead
- * of each component picking its own isBrutalist ? X : Y numbers.
+ * of each component picking its own hardEdges ? X : Y numbers.
  */
 export interface RadiusScale {
   sheet: number; // bottom-sheet modals (top corners)
@@ -191,45 +257,154 @@ export interface RadiusScale {
   field: number; // text inputs, small controls
 }
 
-const RADIUS: Record<'default' | 'brutalist', RadiusScale> = {
-  default: { sheet: 28, box: 16, field: 14 },
-  brutalist: { sheet: 8, box: 6, field: 6 },
-};
-
 export const spacing = { xs: 6, sm: 12, md: 16, lg: 20, xl: 24 } as const;
 
-function makeRadius(isBrutalist: boolean): RadiusScale {
-  return isBrutalist ? RADIUS.brutalist : RADIUS.default;
+const roundedRadius: RadiusScale = { sheet: 28, box: 16, field: 14 };
+const sharpRadius: RadiusScale = { sheet: 8, box: 6, field: 6 };
+const terminalRadius: RadiusScale = { sheet: 12, box: 4, field: 4 };
+
+/**
+ * Shape tokens: replaces the old scattered `isBrutalist ? X : Y` ternaries
+ * duplicated across TaskCard/PipCard/TabBar/PetPicker/ProfileScreen/
+ * CommitModal/ConfirmModal/TimelineScreen. `hardEdges` themes get thicker
+ * borders and a hard offset drop-shadow instead of none.
+ */
+export interface ThemeShape {
+  radius: RadiusScale;
+  hardEdges: boolean;
 }
 
-const FIXED_PALETTES: Partial<Record<ThemeId, Palette>> = {
-  brutalist: brutalistColors,
-  lockIn: lockInColors,
+/**
+ * Typography tokens per theme. `display`/`body` are font-family overrides;
+ * `undefined` keeps the platform default (React Native's system font), same
+ * as the app's behavior before this theme had any font opinion.
+ */
+export interface ThemeType {
+  display?: string;
+  body?: string;
+  titleWeight: TextStyle['fontWeight'];
+  titleTracking: number;
+  titleCase: 'none' | 'uppercase';
+  badgeDecoration?: { prefix?: string; suffix?: string };
+  tabActivePrefix?: string;
+}
+
+export interface ThemeDefinition {
+  id: ThemeId;
+  label: string;
+  description: string;
+  /** Omitted only for 'default', which follows the OS light/dark setting. */
+  scheme?: Scheme;
+  /** Omitted only for 'default', which resolves colors from `scheme` instead. */
+  colors?: Palette;
+  shape: ThemeShape;
+  type: ThemeType;
+}
+
+const defaultType: ThemeType = {
+  titleWeight: '800',
+  titleTracking: -0.5,
+  titleCase: 'none',
 };
+
+/**
+ * Single source of truth for every theme: palette, shape, and typography.
+ * `useTheme()` and the Profile screen's picker both read this — adding or
+ * changing a theme only ever means editing an entry here.
+ */
+export const THEME_REGISTRY: Record<ThemeId, ThemeDefinition> = {
+  default: {
+    id: 'default',
+    label: 'Default',
+    description: 'Follows your device light/dark setting.',
+    shape: { radius: roundedRadius, hardEdges: false },
+    type: defaultType,
+  },
+  brutalist: {
+    id: 'brutalist',
+    label: 'Brutalist Block',
+    description: 'High-contrast paper & ink.',
+    scheme: 'light',
+    colors: brutalistColors,
+    shape: { radius: sharpRadius, hardEdges: true },
+    type: defaultType,
+  },
+  neonArcade: {
+    id: 'neonArcade',
+    label: 'Neon Arcade',
+    description: 'Synthwave purple-black with magenta/cyan energy.',
+    scheme: 'dark',
+    colors: neonArcadeColors,
+    shape: { radius: roundedRadius, hardEdges: false },
+    type: {
+      display: condensedDisplay,
+      body: condensedDisplay,
+      titleWeight: '900',
+      titleTracking: 2.5,
+      titleCase: 'uppercase',
+      badgeDecoration: { prefix: '▸ ' },
+      tabActivePrefix: '▸ ',
+    },
+  },
+  sunrise: {
+    id: 'sunrise',
+    label: 'Sunrise',
+    description: 'Warm cream & peach, coral and teal accents.',
+    scheme: 'light',
+    colors: sunriseColors,
+    shape: { radius: roundedRadius, hardEdges: false },
+    type: {
+      display: serifDisplay,
+      body: serifDisplay,
+      titleWeight: '700',
+      titleTracking: -0.3,
+      titleCase: 'none',
+    },
+  },
+  terminal: {
+    id: 'terminal',
+    label: 'Terminal',
+    description: 'Pure-black CRT, phosphor green, monospace throughout.',
+    scheme: 'dark',
+    colors: terminalColors,
+    shape: { radius: terminalRadius, hardEdges: true },
+    type: {
+      display: mono,
+      body: mono,
+      titleWeight: '700',
+      titleTracking: 0.5,
+      titleCase: 'none',
+      badgeDecoration: { prefix: '[', suffix: ']' },
+      tabActivePrefix: '> ',
+    },
+  },
+};
+
+/** Display order for the Profile screen's theme picker. */
+export const THEME_ORDER: ThemeId[] = ['default', 'brutalist', 'neonArcade', 'sunrise', 'terminal'];
 
 /**
  * Resolves the active theme. When the user has picked 'default' (the store's
  * initial value), this follows the OS appearance as before. Every other
- * ThemeId maps to a single fixed palette regardless of OS scheme.
+ * ThemeId maps to a single fixed palette/shape/type regardless of OS scheme.
  */
 export function useTheme() {
   const themeId = useThemeStore((s) => s.themeId);
   const osScheme: Scheme = useColorScheme() === 'light' ? 'light' : 'dark';
-  const fixed = FIXED_PALETTES[themeId];
-  const scheme: Scheme = fixed ? (themeId === 'brutalist' ? 'light' : 'dark') : osScheme;
-  const isBrutalist = themeId === 'brutalist';
+  const def = THEME_REGISTRY[themeId];
+  const scheme: Scheme = def.scheme ?? osScheme;
+  const colors = def.colors ?? palettes[scheme];
   return useMemo(() => {
-    const palette = fixed ?? palettes[scheme];
     return {
       scheme,
       themeId,
-      isBrutalist,
-      colors: palette,
-      statusColor: makeStatusColor(palette),
-      badgeBg: makeBadgeBg(palette),
+      colors,
+      statusColor: makeStatusColor(colors),
+      badgeBg: makeBadgeBg(colors),
       mono,
-      radius: makeRadius(isBrutalist),
+      shape: def.shape,
+      type: def.type,
       spacing,
     };
-  }, [themeId, scheme, isBrutalist]);
+  }, [themeId, scheme, colors, def]);
 }
