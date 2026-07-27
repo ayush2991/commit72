@@ -2,6 +2,11 @@ export const SEVENTY_TWO_HOURS_MS = 72 * 60 * 60 * 1000;
 
 export const DEFAULT_TASK_CAP = 6;
 
+// Options offered on the commit sheet for how long the clock runs.
+export type TaskDurationHours = 24 | 48 | 72;
+export const TASK_DURATION_OPTIONS_HOURS: TaskDurationHours[] = [24, 48, 72];
+export const DEFAULT_TASK_DURATION_HOURS: TaskDurationHours = 48;
+
 // PRD §5.1 urgency bands: fresh <35% elapsed, mid 35-75%, urgent >=75%.
 export const URGENT_THRESHOLD = 0.75;
 export const MID_THRESHOLD = 0.35;

@@ -9,13 +9,18 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import { TaskCapReachedError } from '../task/types';
+import {
+  DEFAULT_TASK_DURATION_HOURS,
+  TASK_DURATION_OPTIONS_HOURS,
+  TaskCapReachedError,
+  TaskDurationHours,
+} from '../task/types';
 import { Palette, RadiusScale, useTheme } from './theme';
 
 interface Props {
   visible: boolean;
   onClose: () => void;
-  onCommit: (title: string) => void;
+  onCommit: (title: string, durationHours: TaskDurationHours) => void;
 }
 
 /**
@@ -31,10 +36,14 @@ export function CommitModal({ visible, onClose, onCommit }: Props) {
   );
   const [title, setTitle] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [durationHours, setDurationHours] = useState<TaskDurationHours>(
+    DEFAULT_TASK_DURATION_HOURS
+  );
 
   const close = () => {
     setTitle('');
     setError(null);
+    setDurationHours(DEFAULT_TASK_DURATION_HOURS);
     onClose();
   };
 
@@ -44,7 +53,7 @@ export function CommitModal({ visible, onClose, onCommit }: Props) {
       return;
     }
     try {
-      onCommit(title);
+      onCommit(title, durationHours);
       close();
     } catch (e) {
       setError(
@@ -65,8 +74,8 @@ export function CommitModal({ visible, onClose, onCommit }: Props) {
         <View style={styles.sheet}>
           <Text style={styles.title}>Commit</Text>
           <Text style={styles.copy}>
-            What will you finish in the next 72 hours? Once you commit, the clock
-            doesn&apos;t stop.
+            What will you finish in the next {durationHours} hours? Once you
+            commit, the clock doesn&apos;t stop.
           </Text>
 
           <TextInput
@@ -83,8 +92,33 @@ export function CommitModal({ visible, onClose, onCommit }: Props) {
             onSubmitEditing={submit}
           />
 
+          <View style={styles.durationRow}>
+            {TASK_DURATION_OPTIONS_HOURS.map((hours) => {
+              const selected = hours === durationHours;
+              return (
+                <Pressable
+                  key={hours}
+                  style={[
+                    styles.durationOption,
+                    selected && styles.durationOptionSelected,
+                  ]}
+                  onPress={() => setDurationHours(hours)}
+                >
+                  <Text
+                    style={[
+                      styles.durationOptionText,
+                      selected && styles.durationOptionTextSelected,
+                    ]}
+                  >
+                    {hours}h
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
+
           <View style={styles.clock}>
-            <Text style={styles.clockNum}>72:00</Text>
+            <Text style={styles.clockNum}>{`${durationHours}:00`}</Text>
             <Text style={styles.clockLabel}>
               Hours from the moment you commit
             </Text>
@@ -95,12 +129,14 @@ export function CommitModal({ visible, onClose, onCommit }: Props) {
           ) : (
             <Text style={styles.note}>
               This can&apos;t be paused, extended, or rescheduled. If it&apos;s
-              not done in 72 hours, it&apos;s marked failed.
+              not done in {durationHours} hours, it&apos;s marked failed.
             </Text>
           )}
 
           <Pressable style={styles.commitBtn} onPress={submit}>
-            <Text style={styles.commitBtnText}>Commit for 72 Hours</Text>
+            <Text style={styles.commitBtnText}>
+              Commit for {durationHours} Hours
+            </Text>
           </Pressable>
         </View>
       </KeyboardAvoidingView>
@@ -156,6 +192,31 @@ function makeStyles(
       padding: 16,
       fontSize: 16,
       color: colors.text,
+    },
+    durationRow: {
+      flexDirection: 'row',
+      gap: 10,
+    },
+    durationOption: {
+      flex: 1,
+      backgroundColor: colors.panel,
+      borderColor: colors.border,
+      borderWidth: isBrutalist ? 2 : 1,
+      borderRadius: radius.field,
+      paddingVertical: 12,
+      alignItems: 'center',
+    },
+    durationOptionSelected: {
+      backgroundColor: colors.accent,
+      borderColor: colors.accent,
+    },
+    durationOptionText: {
+      color: colors.textDim,
+      fontSize: 14,
+      fontWeight: '700',
+    },
+    durationOptionTextSelected: {
+      color: colors.bg,
     },
     clock: {
       backgroundColor: colors.panel,

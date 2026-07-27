@@ -27,12 +27,26 @@ function makeService(overrides: { now?: number; taskCap?: number } = {}) {
 }
 
 describe('TaskService.commit', () => {
-  it('creates a task with a 72h deadline from the commit time', () => {
+  it('creates a task with a 48h deadline by default', () => {
     const { service } = makeService({ now: 1000 });
     const task = service.commit('Ship the thing');
     expect(task.committedAt).toBe(1000);
-    expect(task.deadlineAt).toBe(1000 + SEVENTY_TWO_HOURS_MS);
+    expect(task.deadlineAt).toBe(1000 + (SEVENTY_TWO_HOURS_MS * 2) / 3);
     expect(task.completedAt).toBeNull();
+  });
+
+  it('honors an explicit duration choice of 24h/48h/72h', () => {
+    const { service, setNow } = makeService({ now: 0 });
+    expect(service.commit('Quick one', 24).deadlineAt).toBe(
+      SEVENTY_TWO_HOURS_MS / 3
+    );
+    setNow(0);
+    expect(service.commit('Default one', 48).deadlineAt).toBe(
+      (SEVENTY_TWO_HOURS_MS * 2) / 3
+    );
+    expect(service.commit('Full window', 72).deadlineAt).toBe(
+      SEVENTY_TWO_HOURS_MS
+    );
   });
 
   it('honors a custom window (used by the dev-compressed clock)', () => {
@@ -42,7 +56,7 @@ describe('TaskService.commit', () => {
       now: () => 0,
       windowMs: 90_000,
     });
-    const task = service.commit('Short-fuse task');
+    const task = service.commit('Short-fuse task', 72);
     expect(task.deadlineAt).toBe(90_000);
   });
 
@@ -97,7 +111,7 @@ describe('TaskService.complete', () => {
 describe('TaskService.sweep', () => {
   it('marks an expired task as failed and sets the auto-delete grace period', () => {
     const { service, repository, setNow } = makeService({ now: 0 });
-    const task = service.commit('Overdue thing');
+    const task = service.commit('Overdue thing', 72);
 
     setNow(SEVENTY_TWO_HOURS_MS);
     const result = service.sweep();
@@ -134,7 +148,7 @@ describe('TaskService.sweep', () => {
 
   it('anchors failedAt to the deadline, not to a late sweep time', () => {
     const { service, repository, setNow } = makeService({ now: 0 });
-    const task = service.commit('Missed while app was closed');
+    const task = service.commit('Missed while app was closed', 72);
 
     // App reopened well after the deadline but still within the grace window.
     setNow(SEVENTY_TWO_HOURS_MS + SEVENTY_TWO_HOURS_MS / 2);

@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { InMemoryTaskRepository } from '../task/taskRepository';
 import { TaskService } from '../task/taskService';
-import { Task } from '../task/types';
+import { Task, TaskDurationHours } from '../task/types';
 import { usePetStore } from './petStore';
 
 /**
@@ -37,7 +37,7 @@ if (__DEV__) {
 export interface TaskStore {
   tasks: Task[];
   now: number;
-  commit: (title: string) => void;
+  commit: (title: string, durationHours?: TaskDurationHours) => void;
   complete: (id: string) => void;
   recommit: (id: string) => void;
   remove: (id: string) => void;
@@ -51,8 +51,8 @@ export const useTaskStore = create<TaskStore>((set) => {
   return {
     tasks: repository.getAll(),
     now: Date.now(),
-    commit: (title) => {
-      service.commit(title);
+    commit: (title, durationHours) => {
+      service.commit(title, durationHours);
       sync();
     },
     complete: (id) => {

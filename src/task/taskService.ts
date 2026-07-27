@@ -3,12 +3,16 @@ import { generateTaskId } from './id';
 import { TaskRepository } from './taskRepository';
 import {
   DEFAULT_TASK_CAP,
+  DEFAULT_TASK_DURATION_HOURS,
   InvalidTaskTransitionError,
   SEVENTY_TWO_HOURS_MS,
   Task,
   TaskCapReachedError,
+  TaskDurationHours,
   TaskNotFoundError,
 } from './types';
+
+const REFERENCE_WINDOW_HOURS = 72;
 
 export interface TaskServiceOptions {
   repository: TaskRepository;
@@ -49,7 +53,10 @@ export class TaskService {
     this.windowMs = options.windowMs ?? SEVENTY_TWO_HOURS_MS;
   }
 
-  commit(title: string): Task {
+  commit(
+    title: string,
+    durationHours: TaskDurationHours = DEFAULT_TASK_DURATION_HOURS
+  ): Task {
     const trimmed = title.trim();
     if (!trimmed) {
       throw new InvalidTaskTransitionError('Task title cannot be empty');
@@ -60,11 +67,16 @@ export class TaskService {
       throw new TaskCapReachedError(this.taskCap);
     }
 
+    // Scaled against this.windowMs (the ms-equivalent of the reference 72h
+    // window, compressed in dev) so a 24h/48h choice compresses the same way
+    // the 72h default does, instead of taking real hours during dev testing.
+    const windowMs = (durationHours / REFERENCE_WINDOW_HOURS) * this.windowMs;
+
     const task: Task = {
       id: this.generateId(),
       title: trimmed,
       committedAt: now,
-      deadlineAt: now + this.windowMs,
+      deadlineAt: now + windowMs,
       completedAt: null,
       failedAt: null,
       autoDeleteAt: null,
