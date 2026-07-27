@@ -1,109 +1,105 @@
-import { useMemo } from 'react';
 import { PetMood } from '../pet/petHealth';
 import { PixelGrid } from './PixelGrid';
+import { BODY_SCALE, createGrid, Grid, moodIndex, paintScaled, SWAY_SPEED } from './petPixelGrid';
+import { usePetClock } from './usePetClock';
 
-// Same rounded-blob body as Pip (identical eye/mouth coordinates), plus ear
-// tufts and feet layered on as mood-dependent accents.
-const SIL = [
-  '................',
-  '................',
-  '.....#####......',
-  '....#######.....',
-  '...#########....',
-  '..###########...',
-  '..###########...',
-  '..###########...',
-  '..###########...',
-  '..###########...',
-  '..###########...',
-  '..###########...',
-  '...#########....',
-  '....#######.....',
-  '.....#####......',
-  '................',
+// Tufted-owl silhouette (distinct from Pip's rounded blob) — pointy ear tufts droop away as
+// mood worsens instead of just changing color.
+const OSIL = [
+  '................', '................', '................', '....#....#......',
+  '...###..###.....', '..############..', '..############..', '.##############.',
+  '.##############.', '.##############.', '..############..', '..############..',
+  '..############..', '...##########...', '....#..##..#....', '................',
 ];
 
-const EYE_DARK = '#241812';
+const BODY = ['#c9873f', '#c48a45', '#ad8a58', '#95917f', '#8b929c'];
+const BELLY = ['#f0d19a', '#eccf98', '#d8cba8', '#c3c3bb', '#bcc2ca'];
+const BEAK = ['#f0a12e', '#f0a12e', '#d98a1e', '#c07a1a', '#8a5c1a'];
+const BOB_AMOUNT = [0.7, 0.47, 0.35, 0.23, 0.12];
+const WHITE = '#fff';
+const DARK = '#1a1410';
 
-interface MoodVisual {
-  body: string;
-  belly: string;
-  feet: string;
-  tuftsUp: boolean;
-  sadBrow: boolean;
-  mouth: 'grin' | 'smile' | 'flat' | 'frown' | 'wail';
-  sparkle: boolean;
-  raincloud: boolean;
-}
+function buildGrid(mood: PetMood, t: number): Grid {
+  const grid = createGrid();
+  const i = moodIndex(mood);
+  const sc = BODY_SCALE[i];
+  const bob = Math.sin(t * SWAY_SPEED[i]) * BOB_AMOUNT[i];
+  const P = (c: number, r: number, color: string) => paintScaled(grid, c, r, color, { scale: sc, rowOffset: bob });
 
-const MOOD_VISUALS: Record<PetMood, MoodVisual> = {
-  thriving: { body: '#c9873f', belly: '#f0d19a', feet: '#f0a12e', tuftsUp: true, sadBrow: false, mouth: 'grin', sparkle: true, raincloud: false },
-  happy: { body: '#c48a45', belly: '#eccf98', feet: '#f0a12e', tuftsUp: true, sadBrow: false, mouth: 'smile', sparkle: false, raincloud: false },
-  steady: { body: '#ad8a58', belly: '#d8cba8', feet: '#d98a1e', tuftsUp: true, sadBrow: false, mouth: 'flat', sparkle: false, raincloud: false },
-  worried: { body: '#95917f', belly: '#c3c3bb', feet: '#c07a1a', tuftsUp: false, sadBrow: true, mouth: 'frown', sparkle: false, raincloud: true },
-  fading: { body: '#8b929c', belly: '#bcc2ca', feet: '#8a5c1a', tuftsUp: false, sadBrow: true, mouth: 'wail', sparkle: false, raincloud: true },
-};
-
-const MOUTH_PIXELS: Record<MoodVisual['mouth'], { cells: [number, number][]; color: string }> = {
-  grin: { cells: [[6, 9], [7, 9], [8, 9], [7, 10]], color: '#7a2d12' },
-  smile: { cells: [[6, 9], [7, 10], [8, 9]], color: EYE_DARK },
-  flat: { cells: [[6, 10], [7, 10], [8, 10]], color: EYE_DARK },
-  frown: { cells: [[6, 10], [7, 9], [8, 10]], color: EYE_DARK },
-  wail: { cells: [[6, 9], [7, 9], [8, 9], [7, 10]], color: '#3a3428' },
-};
-
-function buildGrid(mood: PetMood): (string | null)[][] {
-  const v = MOOD_VISUALS[mood];
-  const grid: (string | null)[][] = SIL.map((rowStr) =>
-    rowStr.split('').map((ch) => (ch === '#' ? v.body : null))
-  );
-  const set = (c: number, r: number, color: string) => {
-    grid[r][c] = color;
-  };
-
-  // Belly patch.
-  [[6, 8], [7, 8], [8, 9], [6, 9], [7, 9], [6, 10], [7, 10], [8, 10], [6, 11], [7, 11]].forEach(
-    ([c, r]) => set(c, r, v.belly)
-  );
-
-  // Eyes.
-  [[5, 6], [6, 6], [5, 7], [6, 7], [9, 6], [10, 6], [9, 7], [10, 7]].forEach(([c, r]) =>
-    set(c, r, EYE_DARK)
-  );
-  set(5, 6, v.sparkle ? '#ffe08a' : '#ffffff');
-  set(9, 6, v.sparkle ? '#ffe08a' : '#ffffff');
-
-  if (v.sadBrow) {
-    set(6, 5, EYE_DARK);
-    set(9, 5, EYE_DARK);
+  if (i === 4) {
+    (
+      [[4, 0], [5, 0], [6, 0], [7, 0], [8, 0], [9, 0], [10, 0], [11, 0], [5, 1], [6, 1], [9, 1], [10, 1]] as const
+    ).forEach(([c, r]) => P(c, r, '#7a828c'));
+    [4, 7, 10].forEach((c, k) => {
+      const yy = (t * 3 + k * 0.9) % 2.5;
+      P(c, 2 + yy, '#5aa6d6');
+    });
   }
 
-  const mouth = MOUTH_PIXELS[v.mouth];
-  mouth.cells.forEach(([c, r]) => set(c, r, mouth.color));
+  for (let r = 0; r < OSIL.length; r++) {
+    for (let c = 0; c < 16; c++) {
+      if (OSIL[r][c] !== '#') continue;
+      if (r <= 4 && (c <= 4 || c >= 11) && i >= 2) continue; // ear tufts droop away for i>=2
+      P(c, r, BODY[i]);
+    }
+  }
+  if (i >= 2) {
+    P(3, 6 + (i - 2), BODY[i]);
+    P(12, 6 + (i - 2), BODY[i]);
+  }
 
-  // Ear tufts: perky up top when doing well, drooped to the sides when not.
-  if (v.tuftsUp) {
-    set(3, 1, v.body);
-    set(4, 1, v.body);
-    set(11, 1, v.body);
-    set(12, 1, v.body);
+  for (let r = 8; r <= 13; r++) {
+    const w = Math.max(1, r <= 12 ? 3 : 2);
+    for (let c = 7 - w; c <= 7 + w; c++) if (c >= 3 && c <= 12) P(c, r, BELLY[i]);
+  }
+
+  // Eyes: wide-open & round (thriving) narrowing to fully-shut sad crescents (fading).
+  if (i === 0) {
+    (
+      [[3.5, 6.5], [4.5, 6.5], [5.5, 6.5], [3.5, 7.5], [4.5, 7.5], [5.5, 7.5], [3.5, 8.5], [4.5, 8.5], [5.5, 8.5]] as const
+    ).forEach(([c, r]) => P(c, r, WHITE));
+    (
+      [[9.5, 6.5], [10.5, 6.5], [11.5, 6.5], [9.5, 7.5], [10.5, 7.5], [11.5, 7.5], [9.5, 8.5], [10.5, 8.5], [11.5, 8.5]] as const
+    ).forEach(([c, r]) => P(c, r, WHITE));
+    P(4.5, 7.5, DARK);
+    P(10.5, 7.5, DARK);
+    P(3.5, 6.5, '#ddfaff');
+    P(11.5, 6.5, '#ddfaff');
+  } else if (i === 1) {
+    ([[4, 7], [5, 7], [4, 8], [5, 8], [10, 7], [11, 7], [10, 8], [11, 8]] as const).forEach(([c, r]) =>
+      P(c, r, WHITE)
+    );
+    P(5, 8, DARK);
+    P(10, 8, DARK);
+  } else if (i === 2) {
+    (
+      [[4.3, 7.6], [5.3, 7.6], [4.3, 8.6], [5.3, 8.6], [9.7, 7.6], [10.7, 7.6], [9.7, 8.6], [10.7, 8.6]] as const
+    ).forEach(([c, r]) => P(c, r, WHITE));
+    P(4.8, 8.3, DARK);
+    P(10.2, 8.3, DARK);
+  } else if (i === 3) {
+    ([[4.3, 8], [5.3, 8], [9.7, 8], [10.7, 8]] as const).forEach(([c, r]) => P(c, r, WHITE));
+    P(4.8, 8.5, DARK);
+    P(10.2, 8.5, DARK);
+    P(3.8, 7.6, BODY[i]); // heavy lids covering eye tops
+    P(10.8, 7.6, BODY[i]);
   } else {
-    set(2, 3, v.body);
-    set(13, 3, v.body);
+    P(4.3, 8.6, DARK);
+    P(5.3, 8.6, DARK);
+    P(9.7, 8.6, DARK);
+    P(10.7, 8.6, DARK);
   }
 
-  // Feet.
-  set(6, 15, v.feet);
-  set(7, 15, v.feet);
-  set(9, 15, v.feet);
-  set(10, 15, v.feet);
-
-  if (v.raincloud) {
-    set(6, 0, '#7a828c');
-    set(7, 0, '#7a828c');
-    set(8, 0, '#7a828c');
-    set(7, 1, '#5aa6d6');
+  if (i === 0) {
+    P(2, 8.5, '#ff7fa8');
+    P(13.6, 8.5, '#ff7fa8');
   }
+
+  P(7, 9, BEAK[i]);
+  P(8, 9, BEAK[i]);
+  P(7, 10, BEAK[i]);
+  P(6, 15, BEAK[i]);
+  P(9, 15, BEAK[i]);
 
   return grid;
 }
@@ -113,8 +109,9 @@ interface Props {
   size?: number;
 }
 
-/** Hoot: a pocket owl on watch — bright-eyed and puffed up, or drenched under its own rain cloud. */
+/** Hoot: a pocket owl that puffs up proud and bright-eyed, or droops soaked under its own rain cloud. */
 export function HootFace({ mood, size = 152 }: Props) {
-  const grid = useMemo(() => buildGrid(mood), [mood]);
+  const t = usePetClock();
+  const grid = buildGrid(mood, t);
   return <PixelGrid grid={grid} size={size} />;
 }

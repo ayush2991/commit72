@@ -86,7 +86,7 @@ export function TimelineScreen() {
   return (
     <View style={styles.root}>
       <View style={styles.header}>
-        <Text style={styles.title}>Next 72</Text>
+        <Text style={styles.title}>PactPal</Text>
         <Text style={styles.sub}>
           {counts.active === 1
             ? '1 active commitment'

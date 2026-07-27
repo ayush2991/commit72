@@ -32,7 +32,7 @@ export function moodForHealth(health: number): PetMood {
 export const PET_MOOD_COPY: Record<PetMood, { label: string; flavor: string }> = {
   fading: { label: 'Fading', flavor: 'Pip is crushed. Broken pacts hurt.' },
   worried: { label: 'Worried', flavor: "Pip is nervous — a pact's running hot." },
-  steady: { label: 'Steady', flavor: "Pip is steady. Don't slip now." },
+  steady: { label: 'On Track', flavor: "Pip's doing fine. Keep it up." },
   happy: { label: 'Happy', flavor: 'Pip is happy. Keep the momentum.' },
   thriving: { label: 'Thriving', flavor: 'Pip is glowing — every pact on pace.' },
 };

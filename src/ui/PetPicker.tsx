@@ -7,7 +7,7 @@ import { Palette, ThemeShape, ThemeType, useTheme } from './theme';
 const MOOD_LABELS: Record<(typeof ALL_MOODS)[number], string> = {
   thriving: 'THRIVING',
   happy: 'HAPPY',
-  steady: 'STEADY',
+  steady: 'ON TRACK',
   worried: 'WORRIED',
   fading: 'FADING',
 };

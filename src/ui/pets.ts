@@ -4,9 +4,9 @@ import { BoltFace } from './BoltFace';
 import { EmberFace } from './EmberFace';
 import { HootFace } from './HootFace';
 import { PipFace } from './PipFace';
-import { SpikeFace } from './SpikeFace';
+import { SproutFace } from './SproutFace';
 
-export type PetId = 'pip' | 'ember' | 'hoot' | 'bolt' | 'spike';
+export type PetId = 'pip' | 'ember' | 'hoot' | 'bolt' | 'sprout';
 
 export interface PetDef {
   id: PetId;
@@ -38,7 +38,7 @@ export const PET_DEFS: Record<PetId, PetDef> = {
     moodCopy: {
       fading: { label: 'Fading', flavor: 'Ember has guttered to a cold blue flicker.' },
       worried: { label: 'Worried', flavor: 'Ember is burning low — a pact is running hot.' },
-      steady: { label: 'Steady', flavor: 'Ember holds a steady flame. Keep it fed.' },
+      steady: { label: 'On Track', flavor: 'Ember is burning fine. Keep it fed.' },
       happy: { label: 'Happy', flavor: 'Ember is burning bright and gold.' },
       thriving: { label: 'Thriving', flavor: 'Ember is roaring — embers rising on every pact kept.' },
     },
@@ -52,7 +52,7 @@ export const PET_DEFS: Record<PetId, PetDef> = {
     moodCopy: {
       fading: { label: 'Fading', flavor: 'Hoot is drenched, drooping under a rain cloud.' },
       worried: { label: 'Worried', flavor: "Hoot's tufts have drooped — a pact is running hot." },
-      steady: { label: 'Steady', flavor: 'Hoot keeps watch, steady on the perch.' },
+      steady: { label: 'On Track', flavor: 'Hoot keeps calm watch on the perch.' },
       happy: { label: 'Happy', flavor: 'Hoot is bright-eyed and content.' },
       thriving: { label: 'Thriving', flavor: 'Hoot is puffed up proud, tufts held high.' },
     },
@@ -66,23 +66,23 @@ export const PET_DEFS: Record<PetId, PetDef> = {
     moodCopy: {
       fading: { label: 'Fading', flavor: 'Bolt has powered down — cracked and sparking.' },
       worried: { label: 'Worried', flavor: 'Bolt is flickering — a pact is running hot.' },
-      steady: { label: 'Steady', flavor: 'Bolt is idling steady. Keep the charge up.' },
+      steady: { label: 'On Track', flavor: 'Bolt is humming along fine. Keep the charge up.' },
       happy: { label: 'Happy', flavor: 'Bolt is humming along, lights fully lit.' },
       thriving: { label: 'Thriving', flavor: 'Bolt is levitating, charged cyan and sparking with energy.' },
     },
   },
-  spike: {
-    id: 'spike',
-    name: 'Spike',
-    dot: '#43c565',
-    concept: 'A potted desert cactus. Plumps up and flowers when tended; shrivels, browns, and drops its bloom when neglected.',
-    Face: SpikeFace,
+  sprout: {
+    id: 'sprout',
+    name: 'Sprout',
+    dot: '#3fb75f',
+    concept: 'A potted seedling. Stands upright and blooms when tended; wilts brown and droops over a cracked pot when neglected.',
+    Face: SproutFace,
     moodCopy: {
-      fading: { label: 'Fading', flavor: 'Spike has shriveled and dropped its bloom.' },
-      worried: { label: 'Worried', flavor: 'Spike is browning at the tips — a pact is running hot.' },
-      steady: { label: 'Steady', flavor: "Spike is steady, no bloom yet. Don't let it dry out." },
-      happy: { label: 'Happy', flavor: 'Spike is plump and flowering.' },
-      thriving: { label: 'Thriving', flavor: 'Spike is thriving — full bloom, every pact on pace.' },
+      fading: { label: 'Fading', flavor: 'Sprout has wilted to a single curled leaf over a dry pot.' },
+      worried: { label: 'Worried', flavor: 'Sprout is drooping — a pact is running hot.' },
+      steady: { label: 'On Track', flavor: 'Sprout is growing well, no bloom yet. Keep it watered.' },
+      happy: { label: 'Happy', flavor: 'Sprout is upright with fresh leaves unfurling.' },
+      thriving: { label: 'Thriving', flavor: 'Sprout is thriving — full bloom, every pact on pace.' },
     },
   },
 };

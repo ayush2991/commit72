@@ -1,81 +1,111 @@
-import { useMemo } from 'react';
 import { PetMood } from '../pet/petHealth';
 import { PixelGrid } from './PixelGrid';
+import { BODY_SCALE, createGrid, Grid, moodIndex, paint, paintScaled } from './petPixelGrid';
+import { usePetClock } from './usePetClock';
 
-// Blocky rock-bot silhouette with an antenna and stubby feet.
-const SIL = [
-  '................',
-  '................',
-  '.......##.......',
-  '.......##.......',
-  '....########....',
-  '....########....',
-  '....########....',
-  '....########....',
-  '....########....',
-  '....########....',
-  '....########....',
-  '....########....',
-  '....########....',
-  '....########....',
-  '...##....##.....',
-  '................',
-];
+const TOP = ['#94a3b8', '#8f9cae', '#828d9c', '#727986', '#5e636d'];
+const BODY = ['#7a8aa0', '#78869a', '#6f7a8a', '#616874', '#4e535c'];
+const BOT = ['#5b6a80', '#586475', '#4f5867', '#434955', '#3a3e46'];
+const EYE = ['#59f7cf', '#65e6cf', '#8fcfc2', '#c98f8f', '#e04a34'];
 
-interface MoodVisual {
-  top: string;
-  body: string;
-  bot: string;
-  eye: string;
-  antenna: string;
-  ledCols: number[];
-  sparkle: boolean;
-  cracked: boolean;
-  flicker: boolean;
-}
+function buildGrid(mood: PetMood, t: number): Grid {
+  const grid = createGrid();
+  const i = moodIndex(mood);
+  const sc = BODY_SCALE[i];
 
-const MOOD_VISUALS: Record<PetMood, MoodVisual> = {
-  thriving: { top: '#94a3b8', body: '#7a8aa0', bot: '#5b6a80', eye: '#59f7cf', antenna: '#5cf2c8', ledCols: [6, 7, 8, 9], sparkle: true, cracked: false, flicker: false },
-  happy: { top: '#8f9cae', body: '#78869a', bot: '#586475', eye: '#65e6cf', antenna: '#8f9cae', ledCols: [6, 7, 8, 9], sparkle: false, cracked: false, flicker: false },
-  steady: { top: '#828d9c', body: '#6f7a8a', bot: '#4f5867', eye: '#8fcfc2', antenna: '#828d9c', ledCols: [6, 7, 8], sparkle: false, cracked: false, flicker: false },
-  worried: { top: '#727986', body: '#616874', bot: '#434955', eye: '#c98f8f', antenna: '#727986', ledCols: [6, 9], sparkle: false, cracked: false, flicker: true },
-  fading: { top: '#5e636d', body: '#4e535c', bot: '#3a3e46', eye: '#e04a34', antenna: '#a34', ledCols: [7], sparkle: false, cracked: true, flicker: false },
-};
+  // Levitates with a gentle float when doing well, sinks and leans when broken.
+  const levit = i <= 1 ? (Math.sin(t * 2.6) * (i === 0 ? 5 : 3)) / 6 : 0;
+  const sink = i >= 3 ? ((i - 2) * 4) / 6 : 0;
+  const dy = levit + sink;
+  const tilt = i >= 3 ? (i - 2) * 0.06 : 0;
+  const P = (c: number, r: number, color: string) =>
+    paintScaled(grid, c, r, color, { scale: sc, rowOffset: dy, lean: tilt });
 
-function buildGrid(mood: PetMood): (string | null)[][] {
-  const v = MOOD_VISUALS[mood];
-  const grid: (string | null)[][] = SIL.map((rowStr, r) =>
-    rowStr.split('').map((ch) => {
-      if (ch !== '#') return null;
-      if (r <= 3) return v.antenna;
-      if (r >= 12) return v.bot;
-      if (r <= 5) return v.top;
-      return v.body;
-    })
-  );
-  const set = (c: number, r: number, color: string) => {
-    grid[r][c] = color;
-  };
-
-  // Eyes: solid visor blocks, no pupils — a machine, not an animal.
-  [[5, 6], [6, 6], [5, 7], [6, 7], [9, 6], [10, 6], [9, 7], [10, 7]].forEach(([c, r]) =>
-    set(c, r, v.eye)
-  );
-
-  // LED mouth bar — fewer lit segments the worse things get.
-  v.ledCols.forEach((c) => set(c, 10, v.eye));
-
-  if (v.sparkle) {
-    set(4, 2, v.antenna);
-    set(11, 2, v.antenna);
+  // Orbiting energy particles when thriving.
+  if (i === 0) {
+    [0, 1, 2, 3].forEach((k) => {
+      const a = t * 2 + k * 1.57;
+      paint(grid, 7.5 + Math.cos(a) * 5.5, 8 + Math.sin(a) * 5.5 + dy, '#5cf2c8');
+    });
   }
-  if (v.cracked) {
-    set(7, 5, v.bot);
-    set(8, 8, v.bot);
-    set(11, 5, '#ff6a3a');
+
+  // Body block.
+  for (let r = 4; r <= 13; r++)
+    for (let c = 4; c <= 11; c++) P(c, r, r <= 5 ? TOP[i] : r >= 12 ? BOT[i] : BODY[i]);
+  // Corner rivets.
+  ([[4, 4], [11, 4], [4, 13], [11, 13]] as const).forEach(([c, r]) => P(c, r, BOT[i]));
+
+  // Antenna: upright when good, snapped/drooping stub when bad.
+  if (i <= 2) {
+    P(7, 3, BODY[i]);
+    P(7, 2, i === 0 ? '#5cf2c8' : TOP[i]);
+  } else {
+    P(7 + (i - 2) * 0.8, 3.3, BODY[i]);
   }
-  if (v.flicker) {
-    set(9, 6, v.bot);
+
+  // Eyes: bright wide circles shrinking to a flat dead line, X'd out when fading.
+  const flick = i === 3 && Math.sin(t * 9) > 0.4;
+  if (i === 0) {
+    ([[5, 6], [6, 6], [5, 7], [6, 7], [9, 6], [10, 6], [9, 7], [10, 7]] as const).forEach(([c, r]) =>
+      P(c, r, EYE[i])
+    );
+    P(5, 6, '#eafffb');
+    P(9, 6, '#eafffb');
+  } else if (i === 1) {
+    ([[5, 7], [6, 7], [5, 8], [6, 8], [9, 7], [10, 7], [9, 8], [10, 8]] as const).forEach(([c, r]) =>
+      P(c, r, EYE[i])
+    );
+  } else if (i === 2) {
+    ([[5, 8], [6, 8], [9, 8], [10, 8]] as const).forEach(([c, r]) => P(c, r, EYE[i]));
+  } else if (i === 3) {
+    ([[5, 8], [6, 8], [9, 8], [10, 8]] as const).forEach(([c, r]) => P(c, r, flick ? BOT[i] : EYE[i]));
+    P(5, 7.3, BOT[i]);
+    P(10, 7.3, BOT[i]);
+  } else {
+    P(5, 8, EYE[i]);
+    P(6, 9, EYE[i]);
+    P(6, 8, EYE[i]);
+    P(5, 9, EYE[i]);
+    P(9, 8, EYE[i]);
+    P(10, 9, EYE[i]);
+    P(10, 8, EYE[i]);
+    P(9, 9, EYE[i]);
+  }
+
+  // Mouth LED: grin, flattening to a jagged crack.
+  const mc = i >= 3 ? BOT[i] : EYE[i];
+  if (i === 0) {
+    P(6, 11, mc);
+    P(7, 11.6, mc);
+    P(8, 11.6, mc);
+    P(9, 11, mc);
+  } else if (i === 1) {
+    P(6, 11, mc);
+    P(7, 11, mc);
+    P(8, 11, mc);
+    P(9, 11, mc);
+  } else if (i === 2) {
+    P(6, 11, mc);
+    P(7, 11, mc);
+    P(8, 11, mc);
+  } else if (i === 3) {
+    P(6, 11.6, mc);
+    P(7, 11, mc);
+    P(8, 11, mc);
+    P(9, 11.6, mc);
+  } else {
+    P(6, 11, mc);
+    P(7, 12, mc);
+    P(8, 10.4, mc);
+    P(9, 11, mc);
+  }
+
+  // Cracks and sparks when fading.
+  if (i === 4) {
+    ([[7, 5], [7.4, 6], [8, 6.4], [8, 7], [6.6, 9], [6, 10]] as const).forEach(([c, r]) =>
+      P(c, r, '#2c2f36')
+    );
+    if (Math.sin(t * 7) > 0.6) P(11.5, 5, '#ff6a3a');
   }
 
   return grid;
@@ -88,6 +118,7 @@ interface Props {
 
 /** Bolt: a little rock-bot — levitating with charged cyan eyes, or powered down and sparking. */
 export function BoltFace({ mood, size = 152 }: Props) {
-  const grid = useMemo(() => buildGrid(mood), [mood]);
+  const t = usePetClock();
+  const grid = buildGrid(mood, t);
   return <PixelGrid grid={grid} size={size} />;
 }
