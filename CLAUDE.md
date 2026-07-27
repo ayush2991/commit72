@@ -2,7 +2,7 @@
 
 ## Project Structure & Module Organization
 
-Commit72 is an Expo SDK 57 React Native app written in TypeScript. App entry points live at `index.ts` and `App.tsx`. Core lifecycle logic is in `src/task/`, pet state and health logic in `src/pet/`, Zustand stores in `src/store/`, and stateless screens/components in `src/ui/`. Tests sit beside implementation files as `*.test.ts`. Static app images and icons are in `assets/`. Native Android/iOS projects are generated under `android/` and `ios/`; avoid editing them unless the change is native-build specific.
+PactPal is an Expo SDK 57 React Native app written in TypeScript. App entry points live at `index.ts` and `App.tsx`. Core lifecycle logic is in `src/task/`, pet state and health logic in `src/pet/`, Zustand stores in `src/store/`, and stateless screens/components in `src/ui/`. Tests sit beside implementation files as `*.test.ts`. Static app images and icons are in `assets/`. Native Android/iOS projects are generated under `android/` and `ios/`; avoid editing them unless the change is native-build specific.
 
 ## Build, Test, and Development Commands
 

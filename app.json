@@ -1,14 +1,14 @@
 {
   "expo": {
-    "name": "commit72",
-    "slug": "commit72",
+    "name": "PactPal",
+    "slug": "pactpal",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.aayushagarwal.commit72"
+      "bundleIdentifier": "com.aayushagarwal.pactpal"
     },
     "android": {
       "versionCode": 2,
@@ -19,7 +19,7 @@
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.aayushagarwal.commit72"
+      "package": "com.aayushagarwal.pactpal"
     },
     "web": {
       "favicon": "./assets/favicon.png"

@@ -3,7 +3,7 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 ANDROID_DIR="$ROOT_DIR/android"
-APP_ID="${APP_ID:-com.aayushagarwal.commit72}"
+APP_ID="${APP_ID:-com.aayushagarwal.pactpal}"
 APK_PATH="$ANDROID_DIR/app/build/outputs/apk/release/app-release.apk"
 JAVA_HOME="${JAVA_HOME:-/opt/homebrew/opt/openjdk@17}"
 GRADLE_ARGS=("${GRADLE_ARGS:-assembleRelease}")
