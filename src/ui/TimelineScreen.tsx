@@ -1,24 +1,24 @@
 import { useMemo, useState } from 'react';
-import {
-  Alert,
-  FlatList,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { deriveStatus, isActiveStatus } from '../task/deriveStatus';
 import { Task } from '../task/types';
 import { useTaskStore } from '../store/taskStore';
 import { CommitModal } from './CommitModal';
+import { ConfirmAction, ConfirmModal } from './ConfirmModal';
 import { sortForTimeline } from './format';
 import { PipCard } from './PipCard';
 import { TaskCard } from './TaskCard';
 import { Palette, useTheme } from './theme';
 
+interface TaskActionSheet {
+  task: Task;
+  title: string;
+  message: string;
+  actions: ConfirmAction[];
+}
+
 export function TimelineScreen() {
-  const { colors, themeId } = useTheme();
-  const isBrutalist = themeId === 'brutalist';
+  const { colors, isBrutalist } = useTheme();
   const styles = useMemo(() => makeStyles(colors, isBrutalist), [colors, isBrutalist]);
   const tasks = useTaskStore((s) => s.tasks);
   const now = useTaskStore((s) => s.now);
@@ -28,6 +28,8 @@ export function TimelineScreen() {
   const remove = useTaskStore((s) => s.remove);
 
   const [modalOpen, setModalOpen] = useState(false);
+  const [actionSheet, setActionSheet] = useState<TaskActionSheet | null>(null);
+  const [recommitCapSheet, setRecommitCapSheet] = useState(false);
 
   const ordered = useMemo(() => sortForTimeline(tasks, now), [tasks, now]);
   const activeCount = useMemo(
@@ -40,32 +42,47 @@ export function TimelineScreen() {
   const onPressTask = (task: Task) => {
     const status = deriveStatus(task, now);
     if (status === 'failed') {
-      Alert.alert(task.title, 'This clock ran out.', [
-        { text: 'Re-commit, 72h', onPress: () => tryRecommit(task) },
-        { text: 'Let it go', style: 'destructive', onPress: () => remove(task.id) },
-        { text: 'Cancel', style: 'cancel' },
-      ]);
+      setActionSheet({
+        task,
+        title: task.title,
+        message: 'This clock ran out.',
+        actions: [
+          { label: 'Re-commit, 72h', onPress: () => tryRecommit(task) },
+          { label: 'Let it go', variant: 'destructive', onPress: () => remove(task.id) },
+          { label: 'Cancel', variant: 'cancel', onPress: () => {} },
+        ],
+      });
       return;
     }
     if (status === 'done') {
-      Alert.alert(task.title, 'Completed.', [
-        { text: 'Delete', style: 'destructive', onPress: () => remove(task.id) },
-        { text: 'Cancel', style: 'cancel' },
-      ]);
+      setActionSheet({
+        task,
+        title: task.title,
+        message: 'Completed.',
+        actions: [
+          { label: 'Delete', variant: 'destructive', onPress: () => remove(task.id) },
+          { label: 'Cancel', variant: 'cancel', onPress: () => {} },
+        ],
+      });
       return;
     }
-    Alert.alert(task.title, 'Mark this commitment done?', [
-      { text: 'Mark done', onPress: () => complete(task.id) },
-      { text: 'Delete', style: 'destructive', onPress: () => remove(task.id) },
-      { text: 'Cancel', style: 'cancel' },
-    ]);
+    setActionSheet({
+      task,
+      title: task.title,
+      message: 'Mark this commitment done?',
+      actions: [
+        { label: 'Mark done', onPress: () => complete(task.id) },
+        { label: 'Delete', variant: 'destructive', onPress: () => remove(task.id) },
+        { label: 'Cancel', variant: 'cancel', onPress: () => {} },
+      ],
+    });
   };
 
   const tryRecommit = (task: Task) => {
     try {
       recommit(task.id);
     } catch {
-      Alert.alert("Can't re-commit", 'You are at the active-task cap.');
+      setRecommitCapSheet(true);
     }
   };
 
@@ -109,6 +126,22 @@ export function TimelineScreen() {
         visible={modalOpen}
         onClose={() => setModalOpen(false)}
         onCommit={commit}
+      />
+
+      <ConfirmModal
+        visible={actionSheet !== null}
+        title={actionSheet?.title ?? ''}
+        message={actionSheet?.message ?? ''}
+        actions={actionSheet?.actions ?? []}
+        onClose={() => setActionSheet(null)}
+      />
+
+      <ConfirmModal
+        visible={recommitCapSheet}
+        title="Can't re-commit"
+        message="You are at the active-task cap."
+        actions={[{ label: 'OK', variant: 'cancel', onPress: () => {} }]}
+        onClose={() => setRecommitCapSheet(false)}
       />
     </View>
   );
