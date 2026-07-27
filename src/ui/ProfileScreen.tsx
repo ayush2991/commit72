@@ -2,20 +2,13 @@ import { useMemo } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useThemeStore } from '../store/themeStore';
 import { PetPicker } from './PetPicker';
-import { Palette, ThemeId, useTheme } from './theme';
-
-const THEME_OPTIONS: { id: ThemeId; label: string; description: string }[] = [
-  { id: 'default', label: 'Default', description: 'Follows your device light/dark setting.' },
-  { id: 'brutalist', label: 'Brutalist Block', description: 'High-contrast paper & ink.' },
-  { id: 'lockIn', label: 'Lock In', description: 'Disciplined dark mode.' },
-];
+import { Palette, THEME_ORDER, THEME_REGISTRY, ThemeShape, ThemeType, useTheme } from './theme';
 
 export function ProfileScreen() {
-  const { colors } = useTheme();
+  const { colors, shape, type } = useTheme();
   const themeId = useThemeStore((s) => s.themeId);
   const setThemeId = useThemeStore((s) => s.setThemeId);
-  const isBrutalist = themeId === 'brutalist';
-  const styles = useMemo(() => makeStyles(colors, isBrutalist), [colors, isBrutalist]);
+  const styles = useMemo(() => makeStyles(colors, shape, type), [colors, shape, type]);
 
   return (
     <ScrollView style={styles.root} contentContainerStyle={styles.rootContent}>
@@ -26,7 +19,8 @@ export function ProfileScreen() {
 
       <Text style={styles.sectionLabel}>Appearance</Text>
       <View style={styles.section}>
-        {THEME_OPTIONS.map((option, i) => {
+        {THEME_ORDER.map((id, i) => {
+          const option = THEME_REGISTRY[id];
           const selected = themeId === option.id;
           return (
             <Pressable
@@ -52,7 +46,8 @@ export function ProfileScreen() {
   );
 }
 
-function makeStyles(colors: Palette, isBrutalist: boolean) {
+function makeStyles(colors: Palette, shape: ThemeShape, type: ThemeType) {
+  const hardEdges = shape.hardEdges;
   return StyleSheet.create({
     root: {
       flex: 1,
@@ -63,15 +58,17 @@ function makeStyles(colors: Palette, isBrutalist: boolean) {
     },
     header: {
       marginBottom: 18,
-      ...(isBrutalist
+      ...(hardEdges
         ? { borderBottomWidth: 3, borderBottomColor: colors.border, paddingBottom: 12 }
         : null),
     },
     title: {
       color: colors.text,
+      fontFamily: type.display,
       fontSize: 26,
-      fontWeight: '800',
-      letterSpacing: -0.5,
+      fontWeight: type.titleWeight,
+      letterSpacing: type.titleTracking,
+      textTransform: type.titleCase,
     },
     sub: {
       color: colors.textDim,
@@ -92,10 +89,10 @@ function makeStyles(colors: Palette, isBrutalist: boolean) {
     section: {
       backgroundColor: colors.panel,
       borderColor: colors.border,
-      borderWidth: isBrutalist ? 2 : 1,
-      borderRadius: isBrutalist ? 8 : 16,
+      borderWidth: hardEdges ? 2 : 1,
+      borderRadius: hardEdges ? 8 : 16,
       overflow: 'hidden',
-      ...(isBrutalist
+      ...(hardEdges
         ? {
             shadowColor: colors.border,
             shadowOffset: { width: 3, height: 3 },
@@ -121,6 +118,7 @@ function makeStyles(colors: Palette, isBrutalist: boolean) {
     },
     rowLabel: {
       color: colors.text,
+      fontFamily: type.body,
       fontSize: 15.5,
       fontWeight: '600',
     },

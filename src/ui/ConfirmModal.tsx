@@ -24,10 +24,11 @@ interface Props {
  * the app shares the same palette, radii, and font regardless of theme.
  */
 export function ConfirmModal({ visible, title, message, actions, onClose }: Props) {
-  const { colors, mono, radius, isBrutalist } = useTheme();
+  const { colors, mono, shape } = useTheme();
+  const { radius, hardEdges } = shape;
   const styles = useMemo(
-    () => makeStyles(colors, mono, radius, isBrutalist),
-    [colors, mono, radius, isBrutalist]
+    () => makeStyles(colors, mono, radius, hardEdges),
+    [colors, mono, radius, hardEdges]
   );
 
   return (
@@ -74,7 +75,7 @@ function makeStyles(
   colors: Palette,
   mono: string | undefined,
   radius: RadiusScale,
-  isBrutalist: boolean
+  hardEdges: boolean
 ) {
   return StyleSheet.create({
     backdrop: {
@@ -93,7 +94,7 @@ function makeStyles(
       backgroundColor: colors.bgElevated,
       borderTopLeftRadius: radius.sheet,
       borderTopRightRadius: radius.sheet,
-      borderTopWidth: isBrutalist ? 3 : 1,
+      borderTopWidth: hardEdges ? 3 : 1,
       borderColor: colors.border,
       padding: 24,
       paddingBottom: 40,
@@ -119,16 +120,16 @@ function makeStyles(
       borderRadius: radius.box,
       padding: 16,
       alignItems: 'center',
-      ...(isBrutalist ? { borderWidth: 2, borderColor: colors.border } : null),
+      ...(hardEdges ? { borderWidth: 2, borderColor: colors.border } : null),
     },
     actionBtnDestructive: {
       backgroundColor: colors.failedCardBg,
-      borderWidth: isBrutalist ? 2 : 1,
+      borderWidth: hardEdges ? 2 : 1,
       borderColor: colors.urgent,
     },
     actionBtnCancel: {
       backgroundColor: colors.panel,
-      borderWidth: isBrutalist ? 2 : 1,
+      borderWidth: hardEdges ? 2 : 1,
       borderColor: colors.border,
     },
     actionText: {

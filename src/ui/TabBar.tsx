@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { Palette, useTheme } from './theme';
+import { Palette, ThemeType, useTheme } from './theme';
 
 export type Tab = 'timeline' | 'profile';
 
@@ -15,18 +15,18 @@ const TABS: { id: Tab; label: string; glyph: string }[] = [
 ];
 
 export function TabBar({ activeTab, onChange }: Props) {
-  const { colors, themeId } = useTheme();
-  const isBrutalist = themeId === 'brutalist';
-  const styles = useMemo(() => makeStyles(colors, isBrutalist), [colors, isBrutalist]);
+  const { colors, shape, type } = useTheme();
+  const styles = useMemo(() => makeStyles(colors, shape.hardEdges, type), [colors, shape, type]);
 
   return (
     <View style={styles.bar}>
       {TABS.map((tab) => {
         const active = tab.id === activeTab;
+        const label = active && type.tabActivePrefix ? `${type.tabActivePrefix}${tab.label}` : tab.label;
         return (
           <Pressable key={tab.id} style={styles.tab} onPress={() => onChange(tab.id)}>
             <Text style={[styles.glyph, active && styles.glyphActive]}>{tab.glyph}</Text>
-            <Text style={[styles.label, active && styles.labelActive]}>{tab.label}</Text>
+            <Text style={[styles.label, active && styles.labelActive]}>{label}</Text>
           </Pressable>
         );
       })}
@@ -36,7 +36,7 @@ export function TabBar({ activeTab, onChange }: Props) {
 
 export const TAB_BAR_HEIGHT = 64;
 
-function makeStyles(colors: Palette, isBrutalist: boolean) {
+function makeStyles(colors: Palette, hardEdges: boolean, type: ThemeType) {
   return StyleSheet.create({
     bar: {
       position: 'absolute',
@@ -46,7 +46,7 @@ function makeStyles(colors: Palette, isBrutalist: boolean) {
       height: TAB_BAR_HEIGHT,
       flexDirection: 'row',
       backgroundColor: colors.bgElevated,
-      borderTopWidth: isBrutalist ? 3 : 1,
+      borderTopWidth: hardEdges ? 3 : 1,
       borderTopColor: colors.border,
     },
     tab: {
@@ -63,6 +63,7 @@ function makeStyles(colors: Palette, isBrutalist: boolean) {
       color: colors.accent,
     },
     label: {
+      fontFamily: type.body,
       fontSize: 11,
       fontWeight: '600',
       color: colors.textFaint,

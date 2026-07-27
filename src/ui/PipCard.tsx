@@ -3,7 +3,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { computeHealth, moodForHealth, PetMood } from '../pet/petHealth';
 import { usePetSelectionStore } from '../store/petSelectionStore';
 import { PET_DEFS } from './pets';
-import { Palette, useTheme } from './theme';
+import { Palette, ThemeShape, ThemeType, useTheme } from './theme';
 
 interface Props {
   live: number;
@@ -31,8 +31,7 @@ function moodColor(mood: PetMood, colors: Palette): string {
  * affecting the score immediately.
  */
 export function PipCard({ live, kept, broken }: Props) {
-  const { colors, mono, themeId } = useTheme();
-  const isBrutalist = themeId === 'brutalist';
+  const { colors, mono, shape, type } = useTheme();
   const petId = usePetSelectionStore((s) => s.petId);
   const pet = PET_DEFS[petId];
   const health = computeHealth(kept, broken);
@@ -40,8 +39,8 @@ export function PipCard({ live, kept, broken }: Props) {
   const copy = pet.moodCopy[mood];
   const accent = moodColor(mood, colors);
   const styles = useMemo(
-    () => makeStyles(colors, mono, isBrutalist),
-    [colors, mono, isBrutalist]
+    () => makeStyles(colors, mono, shape, type),
+    [colors, mono, shape, type]
   );
 
   return (
@@ -67,17 +66,18 @@ export function PipCard({ live, kept, broken }: Props) {
   );
 }
 
-function makeStyles(colors: Palette, mono: string | undefined, isBrutalist: boolean) {
+function makeStyles(colors: Palette, mono: string | undefined, shape: ThemeShape, type: ThemeType) {
+  const hardEdges = shape.hardEdges;
   return StyleSheet.create({
     card: {
       backgroundColor: colors.panel,
       borderColor: colors.border,
-      borderWidth: isBrutalist ? 2 : 1,
-      borderRadius: isBrutalist ? 8 : 20,
+      borderWidth: hardEdges ? 2 : 1,
+      borderRadius: hardEdges ? 8 : 20,
       padding: 20,
       alignItems: 'center',
       marginBottom: 18,
-      ...(isBrutalist
+      ...(hardEdges
         ? {
             shadowColor: colors.border,
             shadowOffset: { width: 3, height: 3 },
@@ -98,6 +98,7 @@ function makeStyles(colors: Palette, mono: string | undefined, isBrutalist: bool
     },
     flavor: {
       color: colors.text,
+      fontFamily: type.body,
       fontSize: 15,
       fontWeight: '700',
       textAlign: 'center',
