@@ -30,7 +30,7 @@ const service = new TaskService({
 
 if (__DEV__) {
   console.log(
-    `[commit72] dev clock active: ${DEV_WINDOW_MS / 1000}s window (not 72h)`
+    `[pactpal] dev clock active: ${DEV_WINDOW_MS / 1000}s window (not 72h)`
   );
 }
 

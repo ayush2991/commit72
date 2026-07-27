@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Commit72 — Mockup Playground</title>
+<title>PactPal — Mockup Playground</title>
 <style>
   :root{
     --bg:#0b0c10;
@@ -454,7 +454,7 @@
 <body>
 
 <div class="controls">
-  <div class="brand">Commit72 · Mockup Explorer</div>
+  <div class="brand">PactPal · Mockup Explorer</div>
 
   <div class="group">
     <div class="group-label">Screen</div>
@@ -677,7 +677,7 @@ function render(){
 function updatePrompt(){
   const screenNames = {timeline:'the primary timeline screen', commit:'the commit/add-task screen', failed:'the failed-task detail screen'};
   const parts = [];
-  parts.push(`Build ${screenNames[state.screen]} for Commit72, a mobile app where each task starts its own 72-hour countdown the moment a user commits to it — there is no shared or resetting window, every task has an independent deadline.`);
+  parts.push(`Build ${screenNames[state.screen]} for PactPal, a mobile app where each task starts its own 72-hour countdown the moment a user commits to it — there is no shared or resetting window, every task has an independent deadline.`);
 
   if(state.screen === 'timeline'){
     parts.push(`Show ${state.taskCount} committed tasks as cards in a vertical list, each with a title, an urgency badge (FRESH / IN PROGRESS / URGENT / FAILED), and a progress bar tracking elapsed time toward that task's own 72h deadline.`);

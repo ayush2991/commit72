@@ -1,8 +1,8 @@
-# Commit72 — Product Requirements Document
+# PactPal — Product Requirements Document
 
 ## 1. Problem
 
-Most task/planning tools optimize for capturing everything you *might* do, indefinitely. That flexibility is exactly what enables procrastination — tasks can always be pushed to "later" with no real cost. Commit72 is built around the opposite premise: planning should be short-horizon and binding. You commit to a task, a 72-hour clock starts, and there is a real, visible consequence if it isn't done in time.
+Most task/planning tools optimize for capturing everything you *might* do, indefinitely. That flexibility is exactly what enables procrastination — tasks can always be pushed to "later" with no real cost. PactPal is built around the opposite premise: planning should be short-horizon and binding. You commit to a task, a 72-hour clock starts, and there is a real, visible consequence if it isn't done in time.
 
 ## 2. Goals
 

@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this app is
 
-Commit72 ("PactPal") is a commitment-tracking app: a user commits to a task, a clock starts (default 72h, configurable per-task to 24/48/72h), and the task is either completed or becomes `failed` when time runs out. A virtual pet's health rises when tasks are kept and drops when tasks fail, giving the streak mechanic a visible face. See `PRD.md` for product intent and `TECH_DESIGN.md` for the original architecture proposal (some of it — SQLite persistence, `expo-notifications`, `react-navigation` — is planned but not yet implemented; see "Current vs. designed state" below).
+PactPal is a commitment-tracking app: a user commits to a task, a clock starts (default 72h, configurable per-task to 24/48/72h), and the task is either completed or becomes `failed` when time runs out. A virtual pet's health rises when tasks are kept and drops when tasks fail, giving the streak mechanic a visible face. See `PRD.md` for product intent and `TECH_DESIGN.md` for the original architecture proposal (some of it — SQLite persistence, `expo-notifications`, `react-navigation` — is planned but not yet implemented; see "Current vs. designed state" below).
 
 ## Build, Test, and Development Commands
 

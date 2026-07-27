@@ -1,4 +1,4 @@
-# Commit72 — Technical Design Doc (v1)
+# PactPal — Technical Design Doc (v1)
 
 Based on `PRD.md`. Scope: local-first mobile app, iOS + Android, solo/hobby project.
 
