@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
-import { deriveStatus, isActiveStatus } from '../task/deriveStatus';
+import { countTaskStatuses, deriveStatus } from '../task/deriveStatus';
 import { Task } from '../task/types';
 import { useTaskStore } from '../store/taskStore';
 import { CommitModal } from './CommitModal';
@@ -32,10 +32,7 @@ export function TimelineScreen() {
   const [recommitCapSheet, setRecommitCapSheet] = useState(false);
 
   const ordered = useMemo(() => sortForTimeline(tasks, now), [tasks, now]);
-  const activeCount = useMemo(
-    () => tasks.filter((t) => isActiveStatus(deriveStatus(t, now))).length,
-    [tasks, now]
-  );
+  const counts = useMemo(() => countTaskStatuses(tasks, now), [tasks, now]);
 
   // Tap a card to act on it. The available actions depend on the derived
   // status, keeping the lifecycle rules from TaskService reachable from the UI.
@@ -91,9 +88,9 @@ export function TimelineScreen() {
       <View style={styles.header}>
         <Text style={styles.title}>Next 72</Text>
         <Text style={styles.sub}>
-          {activeCount === 1
+          {counts.active === 1
             ? '1 active commitment'
-            : `${activeCount} active commitments`}
+            : `${counts.active} active commitments`}
         </Text>
       </View>
 
@@ -102,7 +99,9 @@ export function TimelineScreen() {
         keyExtractor={(t) => t.id}
         contentContainerStyle={styles.list}
         showsVerticalScrollIndicator={false}
-        ListHeaderComponent={<PipCard live={activeCount} />}
+        ListHeaderComponent={
+          <PipCard live={counts.active} kept={counts.kept} broken={counts.broken} />
+        }
         ListEmptyComponent={
           <View style={styles.empty}>
             <Text style={styles.emptyTitle}>Nothing committed yet</Text>
