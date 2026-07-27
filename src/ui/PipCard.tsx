@@ -2,12 +2,13 @@ import { useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { computeHealth, moodForHealth, PetMood } from '../pet/petHealth';
 import { usePetSelectionStore } from '../store/petSelectionStore';
-import { usePetStore } from '../store/petStore';
 import { PET_DEFS } from './pets';
 import { Palette, useTheme } from './theme';
 
 interface Props {
   live: number;
+  kept: number;
+  broken: number;
 }
 
 function moodColor(mood: PetMood, colors: Palette): string {
@@ -24,14 +25,14 @@ function moodColor(mood: PetMood, colors: Palette): string {
 }
 
 /**
- * Pip's health is a running score derived from lifetime kept-vs-broken pacts
- * (see src/pet/petHealth.ts) — not tied to any single task's countdown.
+ * Pip's health (see src/pet/petHealth.ts) is derived from tasks currently in
+ * the list: kept/broken are the counts of done/failed tasks in view right
+ * now, so a task cleaned up (auto-deleted or manually removed) stops
+ * affecting the score immediately.
  */
-export function PipCard({ live }: Props) {
+export function PipCard({ live, kept, broken }: Props) {
   const { colors, mono, themeId } = useTheme();
   const isBrutalist = themeId === 'brutalist';
-  const kept = usePetStore((s) => s.kept);
-  const broken = usePetStore((s) => s.broken);
   const petId = usePetSelectionStore((s) => s.petId);
   const pet = PET_DEFS[petId];
   const health = computeHealth(kept, broken);

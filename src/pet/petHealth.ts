@@ -10,10 +10,11 @@ const KEPT_DELTA = 18;
 const BROKEN_DELTA = -32;
 
 /**
- * Pip's health is a running score, not a live-window average: keeping a pact
- * nudges it up, letting one expire drags it down hard. No history is stored
- * beyond the two counters — consistent with the rest of the app being
- * in-memory-only today.
+ * `kept`/`broken` are the counts of done/failed tasks currently in view (see
+ * `countTaskStatuses` in src/task/deriveStatus.ts), recomputed on every
+ * render — not a lifetime total. A task stops affecting health the moment
+ * it's no longer in the list, whether it was auto-deleted past its grace
+ * period or removed manually.
  */
 export function computeHealth(kept: number, broken: number): number {
   const raw = PET_HEALTH_DEFAULT + kept * KEPT_DELTA + broken * BROKEN_DELTA;

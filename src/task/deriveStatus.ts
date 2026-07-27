@@ -30,3 +30,28 @@ export function deriveStatus(task: Task, now: number): TaskStatus {
 export function isActiveStatus(status: TaskStatus): boolean {
   return status === 'fresh' || status === 'mid' || status === 'urgent';
 }
+
+export interface TaskStatusCounts {
+  active: number;
+  kept: number;
+  broken: number;
+}
+
+/**
+ * Counts by current derived status, over whatever tasks are presently in the
+ * repository. A task that's been cleaned up (auto-deleted past its grace
+ * period, or manually removed) is simply absent from `tasks`, so it stops
+ * contributing here the moment it's gone.
+ */
+export function countTaskStatuses(tasks: Task[], now: number): TaskStatusCounts {
+  let active = 0;
+  let kept = 0;
+  let broken = 0;
+  for (const task of tasks) {
+    const status = deriveStatus(task, now);
+    if (isActiveStatus(status)) active++;
+    else if (status === 'done') kept++;
+    else if (status === 'failed') broken++;
+  }
+  return { active, kept, broken };
+}
