@@ -19,19 +19,41 @@ export function statusLabel(status: TaskStatus): string {
 }
 
 /**
- * Fraction of this task's own window elapsed, clamped to [0, 1]. Uses the
- * task's stored window (deadlineAt - committedAt) rather than a fixed 72h, so
- * the bar stays correct under the dev-compressed clock. Done reads as full.
+ * Fraction of this task's current window elapsed, clamped to [0, 1]. While
+ * live, that's the commitment window (deadlineAt - committedAt). Once a task
+ * is done or failed and has an autoDeleteAt (the retention window before
+ * auto-cleanup), the bar repurposes itself to track that instead — reusing
+ * the same track/fill UI to show time-until-removal rather than adding a new
+ * element. Window is each task's own stored value rather than a fixed 72h, so
+ * this stays correct under the dev-compressed clock either way.
  */
 export function progressFraction(task: Task, now: number): number {
-  if (task.completedAt !== null) return 1;
+  if (task.autoDeleteAt !== null) {
+    const anchor = task.completedAt ?? task.failedAt ?? task.autoDeleteAt;
+    const window = task.autoDeleteAt - anchor;
+    return window <= 0 ? 1 : Math.max(0, Math.min(1, (now - anchor) / window));
+  }
   const window = task.deadlineAt - task.committedAt;
   if (window <= 0) return 1;
   return Math.max(0, Math.min(1, (now - task.committedAt) / window));
 }
 
-/** Right-aligned countdown, e.g. "5h left", "42m left", "9s left", "Expired". */
+/**
+ * Right-aligned countdown. While live: "5h left" / "42m left" / "9s left".
+ * Once a task has an autoDeleteAt (done or failed, retention in progress):
+ * "Removed in 6h" / "Removed in 42m" / "Removed in 9s" / "Removing…".
+ */
 export function countdownText(task: Task, now: number): string {
+  if (task.autoDeleteAt !== null) {
+    const remaining = task.autoDeleteAt - now;
+    if (remaining <= 0) return 'Removing…';
+    if (remaining >= HOUR_MS) return `Removed in ${Math.floor(remaining / HOUR_MS)}h`;
+    if (remaining >= MINUTE_MS) return `Removed in ${Math.floor(remaining / MINUTE_MS)}m`;
+    return `Removed in ${Math.max(1, Math.ceil(remaining / SECOND_MS))}s`;
+  }
+  // Defensive fallbacks below — completedAt always carries an autoDeleteAt
+  // (set together in TaskService.complete()), and a just-failed task only
+  // lacks one for the brief window before the next sweep() tick fills it in.
   if (task.completedAt !== null) return 'Completed';
   const remaining = task.deadlineAt - now;
   if (remaining <= 0) return 'Expired';

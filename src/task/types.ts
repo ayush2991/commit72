@@ -18,7 +18,7 @@ export interface Task {
   deadlineAt: number; // epoch ms, committedAt + 72h
   completedAt: number | null;
   failedAt: number | null; // set by sweep() the first time now >= deadlineAt
-  autoDeleteAt: number | null; // failedAt + 72h grace period
+  autoDeleteAt: number | null; // when done/failed, completedAt/failedAt + 72h retention window
   recommitCount: number;
   notificationsEnabled: boolean;
 }
