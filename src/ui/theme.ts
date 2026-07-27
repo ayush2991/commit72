@@ -180,6 +180,28 @@ export const mono = Platform.select({
   default: 'monospace',
 });
 
+/**
+ * Shared shape/spacing tokens so sheets, cards, and buttons across the app
+ * (CommitModal, ConfirmModal, TaskCard, ...) agree on the same radii instead
+ * of each component picking its own isBrutalist ? X : Y numbers.
+ */
+export interface RadiusScale {
+  sheet: number; // bottom-sheet modals (top corners)
+  box: number; // clock/stat boxes, primary buttons
+  field: number; // text inputs, small controls
+}
+
+const RADIUS: Record<'default' | 'brutalist', RadiusScale> = {
+  default: { sheet: 28, box: 16, field: 14 },
+  brutalist: { sheet: 8, box: 6, field: 6 },
+};
+
+export const spacing = { xs: 6, sm: 12, md: 16, lg: 20, xl: 24 } as const;
+
+function makeRadius(isBrutalist: boolean): RadiusScale {
+  return isBrutalist ? RADIUS.brutalist : RADIUS.default;
+}
+
 const FIXED_PALETTES: Partial<Record<ThemeId, Palette>> = {
   brutalist: brutalistColors,
   lockIn: lockInColors,
@@ -195,15 +217,19 @@ export function useTheme() {
   const osScheme: Scheme = useColorScheme() === 'light' ? 'light' : 'dark';
   const fixed = FIXED_PALETTES[themeId];
   const scheme: Scheme = fixed ? (themeId === 'brutalist' ? 'light' : 'dark') : osScheme;
+  const isBrutalist = themeId === 'brutalist';
   return useMemo(() => {
     const palette = fixed ?? palettes[scheme];
     return {
       scheme,
       themeId,
+      isBrutalist,
       colors: palette,
       statusColor: makeStatusColor(palette),
       badgeBg: makeBadgeBg(palette),
       mono,
+      radius: makeRadius(isBrutalist),
+      spacing,
     };
-  }, [themeId, scheme]);
+  }, [themeId, scheme, isBrutalist]);
 }

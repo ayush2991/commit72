@@ -10,7 +10,7 @@ import {
   View,
 } from 'react-native';
 import { TaskCapReachedError } from '../task/types';
-import { Palette, useTheme } from './theme';
+import { Palette, RadiusScale, useTheme } from './theme';
 
 interface Props {
   visible: boolean;
@@ -24,11 +24,10 @@ interface Props {
  * "can't be paused" note come straight from the mockup copy.
  */
 export function CommitModal({ visible, onClose, onCommit }: Props) {
-  const { colors, themeId, mono } = useTheme();
-  const isBrutalist = themeId === 'brutalist';
+  const { colors, mono, radius, isBrutalist } = useTheme();
   const styles = useMemo(
-    () => makeStyles(colors, mono, isBrutalist),
-    [colors, mono, isBrutalist]
+    () => makeStyles(colors, mono, radius, isBrutalist),
+    [colors, mono, radius, isBrutalist]
   );
   const [title, setTitle] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -109,7 +108,12 @@ export function CommitModal({ visible, onClose, onCommit }: Props) {
   );
 }
 
-function makeStyles(colors: Palette, mono: string | undefined, isBrutalist: boolean) {
+function makeStyles(
+  colors: Palette,
+  mono: string | undefined,
+  radius: RadiusScale,
+  isBrutalist: boolean
+) {
   return StyleSheet.create({
     backdrop: {
       flex: 1,
@@ -125,8 +129,8 @@ function makeStyles(colors: Palette, mono: string | undefined, isBrutalist: bool
     },
     sheet: {
       backgroundColor: colors.bgElevated,
-      borderTopLeftRadius: isBrutalist ? 8 : 28,
-      borderTopRightRadius: isBrutalist ? 8 : 28,
+      borderTopLeftRadius: radius.sheet,
+      borderTopRightRadius: radius.sheet,
       borderTopWidth: isBrutalist ? 3 : 1,
       borderColor: colors.border,
       padding: 24,
@@ -148,7 +152,7 @@ function makeStyles(colors: Palette, mono: string | undefined, isBrutalist: bool
       backgroundColor: colors.panel,
       borderColor: colors.border,
       borderWidth: isBrutalist ? 2 : 1,
-      borderRadius: isBrutalist ? 6 : 14,
+      borderRadius: radius.field,
       padding: 16,
       fontSize: 16,
       color: colors.text,
@@ -157,7 +161,7 @@ function makeStyles(colors: Palette, mono: string | undefined, isBrutalist: bool
       backgroundColor: colors.panel,
       borderColor: colors.border,
       borderWidth: isBrutalist ? 2 : 1,
-      borderRadius: isBrutalist ? 6 : 16,
+      borderRadius: radius.box,
       padding: 20,
       alignItems: 'center',
     },
@@ -188,7 +192,7 @@ function makeStyles(colors: Palette, mono: string | undefined, isBrutalist: bool
     },
     commitBtn: {
       backgroundColor: colors.accent,
-      borderRadius: isBrutalist ? 6 : 16,
+      borderRadius: radius.box,
       padding: 18,
       alignItems: 'center',
       marginTop: 4,
