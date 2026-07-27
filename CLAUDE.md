@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this app is
 
-PactPal is a commitment-tracking app: a user commits to a task, a clock starts (default 72h, configurable per-task to 24/48/72h), and the task is either completed or becomes `failed` when time runs out. A virtual pet's health rises when tasks are kept and drops when tasks fail, giving the streak mechanic a visible face. See `PRD.md` for product intent and `TECH_DESIGN.md` for the original architecture proposal (some of it — SQLite persistence, `expo-notifications`, `react-navigation` — is planned but not yet implemented; see "Current vs. designed state" below).
+PactPal is a commitment-tracking app: a user commits to a task, a clock starts (default 72h, configurable per-task to 24/48/72h), and the task is either completed or becomes `failed` when time runs out. Active commitments are capped at `DEFAULT_TASK_CAP` (6, `src/task/types.ts`) — `commit`/`recommit` throw `TaskCapReachedError` past that, which the UI surfaces explicitly rather than silently blocking. A virtual pet's health rises when tasks are kept and drops when tasks fail, giving the streak mechanic a visible face. See `PRD.md` for product intent and `TECH_DESIGN.md` for the original architecture proposal — some of it (SQLite persistence, `expo-notifications`, `react-navigation`) is planned but not yet implemented, per the "Storage today" and "Screens" notes below.
 
 ## Build, Test, and Development Commands
 
@@ -26,9 +26,11 @@ One-way dependency flow: `src/ui/` → `src/store/` (Zustand) → pure services 
 
 **Pet health** (`src/pet/petHealth.ts`) is a running score seeded at 58, +18 per kept task, -32 per failed task, clamped to [0, 100], mapped to a `PetMood` (`fading | worried | steady | happy | thriving`) by fixed breakpoints. `kept`/`broken` are not lifetime counters — `countTaskStatuses(tasks, now)` (`src/task/deriveStatus.ts`) recomputes them live from whatever `done`/`failed` tasks are currently in the repository, so a task stops affecting health the moment it's gone (auto-cleaned-up or manually deleted), not just while it's still in view.
 
+**Theming is a single registry, not scattered conditionals.** `THEME_REGISTRY` (`src/ui/theme.ts`) is the one source of truth for every `ThemeId`'s palette, shape (`ThemeShape`: corner radii, `hardEdges` border/shadow treatment), and typography (`ThemeType`: font family, title weight/tracking/case, badge decoration). `useTheme()` resolves the active `ThemeId` against that registry (falling back to OS light/dark only for the `default` theme) and returns `{ colors, shape, type, ... }`; every themed component (`TaskCard`, `PipCard`, `TabBar`, `PetPicker`, `ProfileScreen`, `CommitModal`, `ConfirmModal`, `TimelineScreen`) reads those tokens directly instead of re-deriving `themeId === 'x'` checks locally. Adding or restyling a theme means editing one entry in `THEME_REGISTRY` (plus `THEME_ORDER` for picker placement) — it should never require touching a component file.
+
 **Stores** (`src/store/`) are thin Zustand wrappers that cache service/repository state for React and re-sync after every mutation:
 - `taskStore.ts` owns the single `TaskService`/`InMemoryTaskRepository` instance app-wide.
-- `petSelectionStore.ts` / `themeStore.ts` — which pet (`PetId` in `src/ui/pets.ts`) and theme (`ThemeId` in `src/ui/theme.ts`) are active; each pet/theme has its own face component and mood copy.
+- `petSelectionStore.ts` / `themeStore.ts` — which pet (`PetId` in `src/ui/pets.ts`) and theme (`ThemeId` in `src/ui/theme.ts`) are active; each pet has its own face component and mood copy.
 
 **Dev-mode time compression:** `taskStore.ts` shrinks the task window to 90 seconds when `__DEV__` is true (real 72h only in release builds), so the full fresh→mid→urgent→failed→auto-deleted lifecycle is watchable in the running app without waiting days. `deriveStatus` is window-agnostic (it reads each task's own `committedAt`/`deadlineAt`), so this is the only place duration is scaled.
 
@@ -50,4 +52,4 @@ Use short Conventional Commit-style prefixes (`feat:`, `refactor:`, `docs:`), e.
 
 - `android/` and `ios/` are generated (gitignored) — avoid editing unless the change is native-build specific.
 - `KNOWN_BUGS.md` tracks open issues found during review; check it and update it when fixing or discovering bugs.
-- `mockups-20260712.html` / `index.html` are static HTML mockups used as the visual/design source of truth (theme tokens in `src/ui/theme.ts` are lifted from them) — not part of the app build.
+- `mockups-20260712.html` / `index.html` are static HTML mockups used as the visual/design source of truth for the original `default`/`brutalist` themes (their tokens in `src/ui/theme.ts` are lifted from the mockups; later `THEME_REGISTRY` entries are original palettes, not mockup-derived) — not part of the app build.
