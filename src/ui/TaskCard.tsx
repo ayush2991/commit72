@@ -37,9 +37,21 @@ export function TaskCard({ task, now }: Props) {
   // Hard-edged themes (Brutalist, Terminal) use solid-color chips with ink
   // text, rather than the default theme's tinted-background + colored-text
   // badge, and only tint the countdown for hot statuses — everything else
-  // reads in plain ink.
-  const badgeBackground = shape.hardEdges ? color : badgeBg[status];
-  const badgeTextColor = shape.hardEdges ? colors.text : isFailed ? colors.badgeFailedText : color;
+  // reads in plain ink. Failed badges always use the dedicated
+  // failedCardBorder/badgeFailedText pair (matching the failed card's own
+  // border color) regardless of hardEdges, since colors.failed is tuned for
+  // legibility as countdown text and can't also serve as a badge background
+  // in dark hard-edged themes without falling below contrast requirements.
+  const badgeBackground = isFailed
+    ? colors.failedCardBorder
+    : shape.hardEdges
+      ? color
+      : badgeBg[status];
+  const badgeTextColor = isFailed
+    ? colors.badgeFailedText
+    : shape.hardEdges
+      ? colors.text
+      : color;
   const countdownColor = shape.hardEdges ? (isHot ? color : colors.text) : color;
   const badgeLabel = `${type.badgeDecoration?.prefix ?? ''}${statusLabel(status)}${
     type.badgeDecoration?.suffix ?? ''
