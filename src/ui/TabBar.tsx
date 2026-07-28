@@ -1,10 +1,10 @@
 import { Feather } from '@expo/vector-icons';
 import { useMemo } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Palette, ThemeShape, useTheme } from './theme';
 
-export type Tab = 'timeline' | 'profile';
+export type Tab = 'timeline' | 'settings';
 
 interface Props {
   activeTab: Tab;
@@ -13,7 +13,7 @@ interface Props {
 
 const TABS: { id: Tab; label: string; icon: keyof typeof Feather.glyphMap }[] = [
   { id: 'timeline', label: 'Timeline', icon: 'clock' },
-  { id: 'profile', label: 'Profile', icon: 'user' },
+  { id: 'settings', label: 'Settings', icon: 'user' },
 ];
 
 const ICON_SIZE = 22;
@@ -28,6 +28,7 @@ export function TabBar({ activeTab, onChange }: Props) {
     <View style={styles.bar}>
       {TABS.map((tab) => {
         const active = tab.id === activeTab;
+        const tint = active ? colors.accent : colors.textFaint;
         return (
           <Pressable
             key={tab.id}
@@ -37,9 +38,8 @@ export function TabBar({ activeTab, onChange }: Props) {
             accessibilityState={{ selected: active }}
             accessibilityLabel={tab.label}
           >
-            <View style={[styles.iconWrap, active && styles.iconWrapActive]}>
-              <Feather name={tab.icon} size={ICON_SIZE} color={active ? colors.accent : colors.textFaint} />
-            </View>
+            <Feather name={tab.icon} size={ICON_SIZE} color={tint} />
+            <Text style={[styles.label, { color: tint }, active && styles.labelActive]}>{tab.label}</Text>
           </Pressable>
         );
       })}
@@ -61,16 +61,14 @@ function makeStyles(colors: Palette, shape: ThemeShape, insetBottom: number) {
       flex: 1,
       alignItems: 'center',
       justifyContent: 'center',
+      gap: 3,
     },
-    iconWrap: {
-      width: 48,
-      height: 36,
-      alignItems: 'center',
-      justifyContent: 'center',
-      borderRadius: shape.hardEdges ? shape.radius.box : 999,
+    label: {
+      fontSize: 11,
+      fontWeight: '500',
     },
-    iconWrapActive: {
-      backgroundColor: colors.panel2,
+    labelActive: {
+      fontWeight: '700',
     },
   });
 }
