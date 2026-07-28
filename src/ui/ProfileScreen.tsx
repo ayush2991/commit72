@@ -1,10 +1,11 @@
 import { useMemo } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { useThemeStore } from '../store/themeStore';
+import { ModePreference, useThemeStore } from '../store/themeStore';
 import { PetPicker } from './PetPicker';
-import { Palette, Scheme, THEME_ORDER, THEME_REGISTRY, ThemeShape, ThemeType, useTheme } from './theme';
+import { Palette, THEME_ORDER, THEME_REGISTRY, ThemeShape, ThemeType, useTheme } from './theme';
 
-const MODE_OPTIONS: { value: Scheme; label: string; description: string }[] = [
+const MODE_OPTIONS: { value: ModePreference; label: string; description: string }[] = [
+  { value: 'system', label: 'System', description: 'Follows your device setting.' },
   { value: 'light', label: 'Light', description: 'Bright background, dark text.' },
   { value: 'dark', label: 'Dark', description: 'Dark background, light text.' },
 ];
@@ -13,8 +14,8 @@ export function ProfileScreen() {
   const { colors, shape, type } = useTheme();
   const themeId = useThemeStore((s) => s.themeId);
   const setThemeId = useThemeStore((s) => s.setThemeId);
-  const mode = useThemeStore((s) => s.mode);
-  const setMode = useThemeStore((s) => s.setMode);
+  const modePreference = useThemeStore((s) => s.modePreference);
+  const setModePreference = useThemeStore((s) => s.setModePreference);
   const styles = useMemo(() => makeStyles(colors, shape, type), [colors, shape, type]);
 
   return (
@@ -27,12 +28,12 @@ export function ProfileScreen() {
       <Text style={styles.sectionLabel}>Mode</Text>
       <View style={styles.section}>
         {MODE_OPTIONS.map((option, i) => {
-          const selected = mode === option.value;
+          const selected = modePreference === option.value;
           return (
             <Pressable
               key={option.value}
               style={[styles.row, i > 0 && styles.rowBorder]}
-              onPress={() => setMode(option.value)}
+              onPress={() => setModePreference(option.value)}
             >
               <View style={styles.rowText}>
                 <Text style={styles.rowLabel}>{option.label}</Text>
