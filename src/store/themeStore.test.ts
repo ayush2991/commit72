@@ -8,13 +8,13 @@ describe('themeStore', () => {
     expect(mode!).toBe('light');
   });
 
-  it('falls back to dark when the OS reports no preference', () => {
+  it('falls back to light when the OS reports no preference', () => {
     let mode: string;
     jest.isolateModules(() => {
       jest.spyOn(require('react-native').Appearance, 'getColorScheme').mockReturnValue(null);
       mode = require('./themeStore').useThemeStore.getState().mode;
     });
-    expect(mode!).toBe('dark');
+    expect(mode!).toBe('light');
   });
 
   it('defaults modePreference to system', () => {

@@ -6,7 +6,7 @@ import type { Scheme, ThemeId } from '../ui/theme';
 export type ModePreference = Scheme | 'system';
 
 function resolveSystemScheme(): Scheme {
-  return Appearance.getColorScheme() === 'light' ? 'light' : 'dark';
+  return Appearance.getColorScheme() === 'dark' ? 'dark' : 'light';
 }
 
 export interface ThemeStore {
@@ -33,6 +33,6 @@ export const useThemeStore = create<ThemeStore>((set) => ({
 // and this listener leaves it alone.
 Appearance.addChangeListener(({ colorScheme }) => {
   if (useThemeStore.getState().modePreference === 'system') {
-    useThemeStore.setState({ mode: colorScheme === 'light' ? 'light' : 'dark' });
+    useThemeStore.setState({ mode: colorScheme === 'dark' ? 'dark' : 'light' });
   }
 });
