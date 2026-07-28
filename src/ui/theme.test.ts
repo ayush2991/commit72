@@ -1,4 +1,37 @@
-import { Palette, palettes, THEME_REGISTRY, ThemeId } from './theme';
+import { Palette, THEME_ORDER, THEME_REGISTRY } from './theme';
+
+describe('THEME_REGISTRY', () => {
+  const expectedKeys = Object.keys(THEME_REGISTRY.default.colors.dark).sort() as (keyof Palette)[];
+
+  it('defines both light and dark palettes for every theme', () => {
+    for (const id of THEME_ORDER) {
+      const def = THEME_REGISTRY[id];
+      expect(def.colors.light).toBeDefined();
+      expect(def.colors.dark).toBeDefined();
+    }
+  });
+
+  it('gives every theme/mode palette exactly the same set of keys', () => {
+    for (const id of THEME_ORDER) {
+      const def = THEME_REGISTRY[id];
+      expect(Object.keys(def.colors.light).sort()).toEqual(expectedKeys);
+      expect(Object.keys(def.colors.dark).sort()).toEqual(expectedKeys);
+    }
+  });
+
+  it('fills every palette key with a non-empty color string', () => {
+    for (const id of THEME_ORDER) {
+      const def = THEME_REGISTRY[id];
+      for (const scheme of ['light', 'dark'] as const) {
+        const palette = def.colors[scheme];
+        for (const key of expectedKeys) {
+          expect(typeof palette[key]).toBe('string');
+          expect(palette[key].length).toBeGreaterThan(0);
+        }
+      }
+    }
+  });
+});
 
 const AA_NORMAL_TEXT = 4.5;
 
@@ -25,20 +58,16 @@ function contrastRatio(a: string, b: string): number {
 }
 
 /**
- * Every ThemeId's resolved palette, including 'default' under both possible
- * OS schemes — mirrors what useTheme() can actually produce at runtime,
- * since 'default' has no fixed palette and instead follows the OS scheme.
+ * Every ThemeId's light and dark palette, resolved directly from the
+ * registry — every theme now defines both explicitly, so there's no OS-scheme
+ * fallback to reproduce here (unlike when only 'default' supported dark mode).
  */
 function resolvedPalettes(): Array<{ name: string; colors: Palette }> {
   const entries: Array<{ name: string; colors: Palette }> = [];
-  for (const id of Object.keys(THEME_REGISTRY) as ThemeId[]) {
+  for (const id of THEME_ORDER) {
     const def = THEME_REGISTRY[id];
-    if (def.colors) {
-      entries.push({ name: id, colors: def.colors });
-    } else {
-      entries.push({ name: `${id}-dark`, colors: palettes.dark });
-      entries.push({ name: `${id}-light`, colors: palettes.light });
-    }
+    entries.push({ name: `${id}-light`, colors: def.colors.light });
+    entries.push({ name: `${id}-dark`, colors: def.colors.dark });
   }
   return entries;
 }

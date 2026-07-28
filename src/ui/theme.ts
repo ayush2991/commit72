@@ -1,4 +1,4 @@
-import { Platform, TextStyle, useColorScheme } from 'react-native';
+import { Platform, TextStyle } from 'react-native';
 import { useMemo } from 'react';
 import { TaskStatus } from '../task/types';
 import { useThemeStore } from '../store/themeStore';
@@ -125,6 +125,36 @@ const brutalistColors: Palette = {
   badgeUrgentBg: 'rgba(255,59,25,0.18)',
 };
 
+// Dark twin of Brutalist: ink becomes the surface, paper becomes the ink.
+// Same stark hard-edged mood and accent family, inverted contrast.
+const brutalistDarkColors: Palette = {
+  bg: '#111111',
+  bgElevated: '#1a1a1a',
+  panel: '#1a1a1a',
+  panel2: '#242424',
+  border: '#f2f0e6',
+  text: '#f2f0e6',
+  textDim: '#c4c0b3',
+  textFaint: '#909090',
+
+  fresh: '#7a7aff',
+  mid: '#00c880',
+  urgent: '#ff5a3a',
+  failed: '#8a8a8a',
+
+  accent: '#ff5a3a',
+  backdrop: 'rgba(0,0,0,0.65)',
+  failedCardBg: '#161616',
+  failedCardBorder: '#4a4a4a',
+  trackBg: '#2a2a2a',
+  urgentBorderAlpha: 'rgba(255,90,58,0.5)',
+  badgeFailedText: '#c0c0c0',
+
+  badgeFreshBg: 'rgba(122,122,255,0.18)',
+  badgeMidBg: 'rgba(0,200,128,0.18)',
+  badgeUrgentBg: 'rgba(255,90,58,0.2)',
+};
+
 // Deep purple-black void with magenta/cyan neon accents — an arcade-cabinet
 // mood, deliberately far from the neutral grays of the default dark theme.
 const neonArcadeColors: Palette = {
@@ -153,6 +183,36 @@ const neonArcadeColors: Palette = {
   badgeFreshBg: 'rgba(57,255,158,0.16)',
   badgeMidBg: 'rgba(255,225,77,0.16)',
   badgeUrgentBg: 'rgba(255,46,136,0.2)',
+};
+
+// Light twin of Neon Arcade: bright lavender paper, deep-purple ink, same
+// magenta accent — status colors darkened for contrast on a light surface.
+const neonArcadeLightColors: Palette = {
+  bg: '#f5ecff',
+  bgElevated: '#ffffff',
+  panel: '#ffffff',
+  panel2: '#ede0fb',
+  border: '#caa8f0',
+  text: '#1a0330',
+  textDim: '#6b4f94',
+  textFaint: '#6f5a90',
+
+  fresh: '#0e9e63',
+  mid: '#b8860a',
+  urgent: '#d1146b',
+  failed: '#6f5a90',
+
+  accent: '#d1146b',
+  backdrop: 'rgba(26,3,48,0.35)',
+  failedCardBg: '#efe3fb',
+  failedCardBorder: '#d8c2f0',
+  trackBg: '#e6d5f7',
+  urgentBorderAlpha: 'rgba(209,20,107,0.35)',
+  badgeFailedText: '#64488c',
+
+  badgeFreshBg: 'rgba(14,158,99,0.14)',
+  badgeMidBg: 'rgba(184,134,10,0.16)',
+  badgeUrgentBg: 'rgba(209,20,107,0.16)',
 };
 
 // Warm cream/peach with coral + teal accents — optimistic morning light,
@@ -185,6 +245,36 @@ const sunriseColors: Palette = {
   badgeUrgentBg: 'rgba(232,97,63,0.16)',
 };
 
+// Dark/dusk twin of Sunrise: warm plum-brown afterglow instead of cream
+// morning light, same coral/teal accents brightened for a dark surface.
+const sunriseDarkColors: Palette = {
+  bg: '#2b1f26',
+  bgElevated: '#352733',
+  panel: '#33252f',
+  panel2: '#3d2c37',
+  border: '#5a4048',
+  text: '#fbe9dc',
+  textDim: '#c9a99a',
+  textFaint: '#ac9a91',
+
+  fresh: '#4ecdbd',
+  mid: '#f5b95a',
+  urgent: '#ff8562',
+  failed: '#ac9a91',
+
+  accent: '#ff8562',
+  backdrop: 'rgba(0,0,0,0.6)',
+  failedCardBg: '#2c2028',
+  failedCardBorder: '#4a3640',
+  trackBg: '#3d2c37',
+  urgentBorderAlpha: 'rgba(255,133,98,0.5)',
+  badgeFailedText: '#c9a99a',
+
+  badgeFreshBg: 'rgba(78,205,189,0.16)',
+  badgeMidBg: 'rgba(245,185,90,0.16)',
+  badgeUrgentBg: 'rgba(255,133,98,0.2)',
+};
+
 // Pure-black CRT terminal — monochrome phosphor green with a single red
 // alarm hue, sharp corners, monospace throughout.
 const terminalColors: Palette = {
@@ -215,7 +305,41 @@ const terminalColors: Palette = {
   badgeUrgentBg: 'rgba(255,51,51,0.2)',
 };
 
-export const palettes: Record<Scheme, Palette> = { dark: darkColors, light: lightColors };
+// Light twin of Terminal: pale green-tinted "printout paper" instead of a
+// pure-black CRT, deep phosphor-green ink, same red alarm hue darkened.
+const terminalLightColors: Palette = {
+  bg: '#eef7ee',
+  bgElevated: '#f7fdf7',
+  panel: '#f7fdf7',
+  panel2: '#e0f0e0',
+  border: '#1c3d1c',
+  text: '#0a2e0a',
+  textDim: '#2f6b2f',
+  textFaint: '#4f6f4f',
+
+  fresh: '#1f8f3f',
+  mid: '#5c8f1f',
+  urgent: '#c02020',
+  failed: '#4f6f4f',
+
+  accent: '#c02020',
+  backdrop: 'rgba(10,30,10,0.4)',
+  failedCardBg: '#e6f2e6',
+  failedCardBorder: '#bcd6bc',
+  trackBg: '#dceedc',
+  urgentBorderAlpha: 'rgba(192,32,32,0.35)',
+  badgeFailedText: '#255a25',
+
+  badgeFreshBg: 'rgba(31,143,63,0.14)',
+  badgeMidBg: 'rgba(92,143,31,0.16)',
+  badgeUrgentBg: 'rgba(192,32,32,0.16)',
+};
+
+const defaultPalettes: Record<Scheme, Palette> = { dark: darkColors, light: lightColors };
+const brutalistPalettes: Record<Scheme, Palette> = { light: brutalistColors, dark: brutalistDarkColors };
+const neonArcadePalettes: Record<Scheme, Palette> = { dark: neonArcadeColors, light: neonArcadeLightColors };
+const sunrisePalettes: Record<Scheme, Palette> = { light: sunriseColors, dark: sunriseDarkColors };
+const terminalPalettes: Record<Scheme, Palette> = { dark: terminalColors, light: terminalLightColors };
 
 export function makeStatusColor(p: Palette): Record<TaskStatus, string> {
   return { done: p.fresh, fresh: p.fresh, mid: p.mid, urgent: p.urgent, failed: p.failed };
@@ -293,10 +417,8 @@ export interface ThemeDefinition {
   id: ThemeId;
   label: string;
   description: string;
-  /** Omitted only for 'default', which follows the OS light/dark setting. */
-  scheme?: Scheme;
-  /** Omitted only for 'default', which resolves colors from `scheme` instead. */
-  colors?: Palette;
+  /** Every theme defines both a light and a dark Palette; `mode` in the theme store picks which one renders. */
+  colors: Record<Scheme, Palette>;
   shape: ThemeShape;
   type: ThemeType;
 }
@@ -316,7 +438,8 @@ export const THEME_REGISTRY: Record<ThemeId, ThemeDefinition> = {
   default: {
     id: 'default',
     label: 'Default',
-    description: 'Follows your device light/dark setting.',
+    description: 'Neutral grays — follows the Mode setting below.',
+    colors: defaultPalettes,
     shape: { radius: roundedRadius, hardEdges: false },
     type: defaultType,
   },
@@ -324,17 +447,15 @@ export const THEME_REGISTRY: Record<ThemeId, ThemeDefinition> = {
     id: 'brutalist',
     label: 'Brutalist Block',
     description: 'High-contrast paper & ink.',
-    scheme: 'light',
-    colors: brutalistColors,
+    colors: brutalistPalettes,
     shape: { radius: sharpRadius, hardEdges: true },
     type: defaultType,
   },
   neonArcade: {
     id: 'neonArcade',
     label: 'Neon Arcade',
-    description: 'Synthwave purple-black with magenta/cyan energy.',
-    scheme: 'dark',
-    colors: neonArcadeColors,
+    description: 'Synthwave purple with magenta/cyan energy.',
+    colors: neonArcadePalettes,
     shape: { radius: roundedRadius, hardEdges: false },
     type: {
       display: condensedDisplay,
@@ -349,9 +470,8 @@ export const THEME_REGISTRY: Record<ThemeId, ThemeDefinition> = {
   sunrise: {
     id: 'sunrise',
     label: 'Sunrise',
-    description: 'Warm cream & peach, coral and teal accents.',
-    scheme: 'light',
-    colors: sunriseColors,
+    description: 'Warm cream/peach or dusk plum, coral and teal accents.',
+    colors: sunrisePalettes,
     shape: { radius: roundedRadius, hardEdges: false },
     type: {
       display: serifDisplay,
@@ -364,9 +484,8 @@ export const THEME_REGISTRY: Record<ThemeId, ThemeDefinition> = {
   terminal: {
     id: 'terminal',
     label: 'Terminal',
-    description: 'Pure-black CRT, phosphor green, monospace throughout.',
-    scheme: 'dark',
-    colors: terminalColors,
+    description: 'CRT phosphor green, monospace throughout.',
+    colors: terminalPalettes,
     shape: { radius: terminalRadius, hardEdges: true },
     type: {
       display: mono,
@@ -384,19 +503,19 @@ export const THEME_REGISTRY: Record<ThemeId, ThemeDefinition> = {
 export const THEME_ORDER: ThemeId[] = ['default', 'brutalist', 'neonArcade', 'sunrise', 'terminal'];
 
 /**
- * Resolves the active theme. When the user has picked 'default' (the store's
- * initial value), this follows the OS appearance as before. Every other
- * ThemeId maps to a single fixed palette/shape/type regardless of OS scheme.
+ * Resolves the active theme. `mode` (light/dark) is a global concern owned by
+ * the theme store — seeded once from the OS appearance at store creation,
+ * then only changed by the user via the Profile screen's Mode toggle — and
+ * applies to whichever ThemeId is selected, including 'default'.
  */
 export function useTheme() {
   const themeId = useThemeStore((s) => s.themeId);
-  const osScheme: Scheme = useColorScheme() === 'light' ? 'light' : 'dark';
+  const mode = useThemeStore((s) => s.mode);
   const def = THEME_REGISTRY[themeId];
-  const scheme: Scheme = def.scheme ?? osScheme;
-  const colors = def.colors ?? palettes[scheme];
+  const colors = def.colors[mode];
   return useMemo(() => {
     return {
-      scheme,
+      scheme: mode,
       themeId,
       colors,
       statusColor: makeStatusColor(colors),
@@ -406,5 +525,5 @@ export function useTheme() {
       type: def.type,
       spacing,
     };
-  }, [themeId, scheme, colors, def]);
+  }, [themeId, mode, colors, def]);
 }
