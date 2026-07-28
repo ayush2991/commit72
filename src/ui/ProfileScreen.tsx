@@ -2,12 +2,19 @@ import { useMemo } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useThemeStore } from '../store/themeStore';
 import { PetPicker } from './PetPicker';
-import { Palette, THEME_ORDER, THEME_REGISTRY, ThemeShape, ThemeType, useTheme } from './theme';
+import { Palette, Scheme, THEME_ORDER, THEME_REGISTRY, ThemeShape, ThemeType, useTheme } from './theme';
+
+const MODE_OPTIONS: { value: Scheme; label: string; description: string }[] = [
+  { value: 'light', label: 'Light', description: 'Bright background, dark text.' },
+  { value: 'dark', label: 'Dark', description: 'Dark background, light text.' },
+];
 
 export function ProfileScreen() {
   const { colors, shape, type } = useTheme();
   const themeId = useThemeStore((s) => s.themeId);
   const setThemeId = useThemeStore((s) => s.setThemeId);
+  const mode = useThemeStore((s) => s.mode);
+  const setMode = useThemeStore((s) => s.setMode);
   const styles = useMemo(() => makeStyles(colors, shape, type), [colors, shape, type]);
 
   return (
@@ -17,7 +24,29 @@ export function ProfileScreen() {
         <Text style={styles.sub}>Settings</Text>
       </View>
 
-      <Text style={styles.sectionLabel}>Appearance</Text>
+      <Text style={styles.sectionLabel}>Mode</Text>
+      <View style={styles.section}>
+        {MODE_OPTIONS.map((option, i) => {
+          const selected = mode === option.value;
+          return (
+            <Pressable
+              key={option.value}
+              style={[styles.row, i > 0 && styles.rowBorder]}
+              onPress={() => setMode(option.value)}
+            >
+              <View style={styles.rowText}>
+                <Text style={styles.rowLabel}>{option.label}</Text>
+                <Text style={styles.rowDescription}>{option.description}</Text>
+              </View>
+              <Text style={[styles.radio, selected && styles.radioSelected]}>
+                {selected ? '●' : '○'}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </View>
+
+      <Text style={[styles.sectionLabel, styles.companionLabel]}>Appearance</Text>
       <View style={styles.section}>
         {THEME_ORDER.map((id, i) => {
           const option = THEME_REGISTRY[id];

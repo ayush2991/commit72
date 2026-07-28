@@ -1,4 +1,4 @@
-import { Platform, TextStyle, useColorScheme } from 'react-native';
+import { Platform, TextStyle } from 'react-native';
 import { useMemo } from 'react';
 import { TaskStatus } from '../task/types';
 import { useThemeStore } from '../store/themeStore';
@@ -27,17 +27,20 @@ export interface Palette {
   failedCardBorder: string;
   trackBg: string;
   urgentBorderAlpha: string;
+  badgeFailedText: string;
 
   badgeFreshBg: string;
   badgeMidBg: string;
   badgeUrgentBg: string;
 
-  /** Text color for the status badge chip — tuned per-theme against that
-   * theme's actual chip background (tinted or solid), not the raw status hue. */
-  badgeInk: { fresh: string; mid: string; urgent: string; failed: string };
+  /** Text color for the status badge chip's fresh/mid/urgent states — tuned
+   * per-palette against that palette's actual chip background (tinted or
+   * solid). The failed badge keeps using the dedicated badgeFailedText pair. */
+  badgeInk: { fresh: string; mid: string; urgent: string };
   /** Text color for a status hue painted directly on a plain surface (no
-   * chip), e.g. the pet mood label and the hot countdown text. */
-  statusInk: { fresh: string; mid: string; urgent: string; failed: string };
+   * chip), e.g. the pet mood label and the hot countdown text. `failed`
+   * reuses the `failed` token itself, which is already tuned for this. */
+  statusInk: { fresh: string; mid: string; urgent: string };
 }
 
 /**
@@ -53,12 +56,12 @@ const darkColors: Palette = {
   border: '#26282f',
   text: '#f4f4f5',
   textDim: '#8a8d96',
-  textFaint: '#54575f',
+  textFaint: '#838791',
 
   fresh: '#3ddc84',
   mid: '#f5c542',
   urgent: '#f44734', // hsl(6 90% 58%)
-  failed: '#6b6e76',
+  failed: '#7c8088',
 
   accent: '#f2643a', // hsl(6 85% 55%)
   backdrop: 'rgba(0,0,0,0.55)',
@@ -66,13 +69,14 @@ const darkColors: Palette = {
   failedCardBorder: '#2a2b2f',
   trackBg: '#232429',
   urgentBorderAlpha: 'rgba(244,71,52,0.5)',
+  badgeFailedText: '#919399',
 
   badgeFreshBg: 'rgba(61,220,132,0.15)',
   badgeMidBg: 'rgba(245,197,66,0.15)',
   badgeUrgentBg: 'rgba(244,71,52,0.18)',
 
-  badgeInk: { fresh: '#3ddc84', mid: '#f5c542', urgent: '#f55846', failed: '#8f9299' },
-  statusInk: { fresh: '#3ddc84', mid: '#f5c542', urgent: '#f44734', failed: '#7b7f88' },
+  badgeInk: { fresh: '#3ddc84', mid: '#f5c542', urgent: '#f55846' },
+  statusInk: { fresh: '#3ddc84', mid: '#f5c542', urgent: '#f44734' },
 };
 
 const lightColors: Palette = {
@@ -83,12 +87,12 @@ const lightColors: Palette = {
   border: '#e2e2e6',
   text: '#0d0e12',
   textDim: '#5c5f68',
-  textFaint: '#9296a0',
+  textFaint: '#686d78',
 
   fresh: '#1fa25a',
   mid: '#a3760a',
   urgent: '#d8321e',
-  failed: '#9a9da5',
+  failed: '#696c75',
 
   accent: '#d8321e',
   backdrop: 'rgba(0,0,0,0.35)',
@@ -96,13 +100,14 @@ const lightColors: Palette = {
   failedCardBorder: '#dcdce0',
   trackBg: '#e6e6ea',
   urgentBorderAlpha: 'rgba(216,50,30,0.35)',
+  badgeFailedText: '#5c5f66',
 
   badgeFreshBg: 'rgba(31,162,90,0.12)',
   badgeMidBg: 'rgba(163,118,10,0.12)',
   badgeUrgentBg: 'rgba(216,50,30,0.14)',
 
-  badgeInk: { fresh: '#187d45', mid: '#8c6509', urgent: '#c52e1b', failed: '#5d6069' },
-  statusInk: { fresh: '#1a864b', mid: '#996f09', urgent: '#d8321e', failed: '#6b6e78' },
+  badgeInk: { fresh: '#187d45', mid: '#8c6509', urgent: '#c22d1b' },
+  statusInk: { fresh: '#1a864b', mid: '#996f09', urgent: '#d8321e' },
 };
 
 // Lifted from the "1e — BLOCK" mockup option (Commit72.dc.html): a fixed
@@ -115,12 +120,12 @@ const brutalistColors: Palette = {
   border: '#111111',
   text: '#111111',
   textDim: '#5c5a53',
-  textFaint: '#8a8a8a',
+  textFaint: '#5f5f5f',
 
   fresh: '#4d4dff',
   mid: '#00a86b',
   urgent: '#ff3b19',
-  failed: '#8a8a8a',
+  failed: '#5c5c5c',
 
   accent: '#ff3b19',
   backdrop: 'rgba(17,17,17,0.55)',
@@ -128,13 +133,47 @@ const brutalistColors: Palette = {
   failedCardBorder: '#3a3a3a',
   trackBg: '#d9d4c6',
   urgentBorderAlpha: 'rgba(255,59,25,0.5)',
+  badgeFailedText: '#a6a49d',
 
   badgeFreshBg: 'rgba(77,77,255,0.16)',
   badgeMidBg: 'rgba(0,168,107,0.16)',
   badgeUrgentBg: 'rgba(255,59,25,0.18)',
 
-  badgeInk: { fresh: '#e8e8ff', mid: '#003220', urgent: '#460a00', failed: '#a4a4a4' },
-  statusInk: { fresh: '#4d4dff', mid: '#008857', urgent: '#e62200', failed: '#5e5e5e' },
+  badgeInk: { fresh: '#e8e8ff', mid: '#003220', urgent: '#460a00' },
+  statusInk: { fresh: '#4d4dff', mid: '#008857', urgent: '#e62200' },
+};
+
+// Dark twin of Brutalist: ink becomes the surface, paper becomes the ink.
+// Same stark hard-edged mood and accent family, inverted contrast.
+const brutalistDarkColors: Palette = {
+  bg: '#111111',
+  bgElevated: '#1a1a1a',
+  panel: '#1a1a1a',
+  panel2: '#242424',
+  border: '#f2f0e6',
+  text: '#f2f0e6',
+  textDim: '#c4c0b3',
+  textFaint: '#909090',
+
+  fresh: '#7a7aff',
+  mid: '#00c880',
+  urgent: '#ff5a3a',
+  failed: '#8a8a8a',
+
+  accent: '#ff5a3a',
+  backdrop: 'rgba(0,0,0,0.65)',
+  failedCardBg: '#161616',
+  failedCardBorder: '#4a4a4a',
+  trackBg: '#2a2a2a',
+  urgentBorderAlpha: 'rgba(255,90,58,0.5)',
+  badgeFailedText: '#c0c0c0',
+
+  badgeFreshBg: 'rgba(122,122,255,0.18)',
+  badgeMidBg: 'rgba(0,200,128,0.18)',
+  badgeUrgentBg: 'rgba(255,90,58,0.2)',
+
+  badgeInk: { fresh: '#000084', mid: '#004c31', urgent: '#580e00' },
+  statusInk: { fresh: '#7a7aff', mid: '#00c880', urgent: '#ff5a3a' },
 };
 
 // Deep purple-black void with magenta/cyan neon accents — an arcade-cabinet
@@ -147,12 +186,12 @@ const neonArcadeColors: Palette = {
   border: '#3d0a6b',
   text: '#f5eaff',
   textDim: '#b9a4d9',
-  textFaint: '#7c6a99',
+  textFaint: '#8c7ca5',
 
   fresh: '#39ff9e',
   mid: '#ffe14d',
   urgent: '#ff2e88',
-  failed: '#6f6180',
+  failed: '#867798',
 
   accent: '#ff2e88',
   backdrop: 'rgba(10,0,20,0.65)',
@@ -160,13 +199,47 @@ const neonArcadeColors: Palette = {
   failedCardBorder: '#3d0a6b',
   trackBg: '#24044a',
   urgentBorderAlpha: 'rgba(255,46,136,0.5)',
+  badgeFailedText: '#b9a4d9',
 
   badgeFreshBg: 'rgba(57,255,158,0.16)',
   badgeMidBg: 'rgba(255,225,77,0.16)',
   badgeUrgentBg: 'rgba(255,46,136,0.2)',
 
-  badgeInk: { fresh: '#39ff9e', mid: '#ffe14d', urgent: '#ff3f92', failed: '#988ca8' },
-  statusInk: { fresh: '#39ff9e', mid: '#ffe14d', urgent: '#ff2e88', failed: '#837495' },
+  badgeInk: { fresh: '#39ff9e', mid: '#ffe14d', urgent: '#ff3f92' },
+  statusInk: { fresh: '#39ff9e', mid: '#ffe14d', urgent: '#ff2e88' },
+};
+
+// Light twin of Neon Arcade: bright lavender paper, deep-purple ink, same
+// magenta accent — status colors darkened for contrast on a light surface.
+const neonArcadeLightColors: Palette = {
+  bg: '#f5ecff',
+  bgElevated: '#ffffff',
+  panel: '#ffffff',
+  panel2: '#ede0fb',
+  border: '#caa8f0',
+  text: '#1a0330',
+  textDim: '#6b4f94',
+  textFaint: '#6f5a90',
+
+  fresh: '#0e9e63',
+  mid: '#b8860a',
+  urgent: '#d1146b',
+  failed: '#6f5a90',
+
+  accent: '#d1146b',
+  backdrop: 'rgba(26,3,48,0.35)',
+  failedCardBg: '#efe3fb',
+  failedCardBorder: '#d8c2f0',
+  trackBg: '#e6d5f7',
+  urgentBorderAlpha: 'rgba(209,20,107,0.35)',
+  badgeFailedText: '#64488c',
+
+  badgeFreshBg: 'rgba(14,158,99,0.14)',
+  badgeMidBg: 'rgba(184,134,10,0.16)',
+  badgeUrgentBg: 'rgba(209,20,107,0.16)',
+
+  badgeInk: { fresh: '#0b7a4c', mid: '#8a6408', urgent: '#c01262' },
+  statusInk: { fresh: '#0c8654', mid: '#996f08', urgent: '#d1146b' },
 };
 
 // Warm cream/peach with coral + teal accents — optimistic morning light,
@@ -178,13 +251,13 @@ const sunriseColors: Palette = {
   panel2: '#ffe9d6',
   border: '#f3c9a8',
   text: '#3a2a20',
-  textDim: '#8a6f5c',
-  textFaint: '#b89a82',
+  textDim: '#876d5a',
+  textFaint: '#84644b',
 
   fresh: '#2a9d8f',
   mid: '#e9a13b',
   urgent: '#e8613f',
-  failed: '#b8a190',
+  failed: '#7a614e',
 
   accent: '#e8613f',
   backdrop: 'rgba(58,42,32,0.35)',
@@ -192,13 +265,47 @@ const sunriseColors: Palette = {
   failedCardBorder: '#e3c3a0',
   trackBg: '#ffe9d6',
   urgentBorderAlpha: 'rgba(232,97,63,0.35)',
+  badgeFailedText: '#624f41',
 
   badgeFreshBg: 'rgba(42,157,143,0.14)',
   badgeMidBg: 'rgba(233,161,59,0.16)',
   badgeUrgentBg: 'rgba(232,97,63,0.16)',
 
-  badgeInk: { fresh: '#20766b', mid: '#965f11', urgent: '#be3817', failed: '#644f40' },
-  statusInk: { fresh: '#228175', mid: '#a06512', urgent: '#d33f19', failed: '#7e6451' },
+  badgeInk: { fresh: '#20766b', mid: '#965f11', urgent: '#be3817' },
+  statusInk: { fresh: '#228175', mid: '#a06512', urgent: '#d33f19' },
+};
+
+// Dark/dusk twin of Sunrise: warm plum-brown afterglow instead of cream
+// morning light, same coral/teal accents brightened for a dark surface.
+const sunriseDarkColors: Palette = {
+  bg: '#2b1f26',
+  bgElevated: '#352733',
+  panel: '#33252f',
+  panel2: '#3d2c37',
+  border: '#5a4048',
+  text: '#fbe9dc',
+  textDim: '#c9a99a',
+  textFaint: '#ac9a91',
+
+  fresh: '#4ecdbd',
+  mid: '#f5b95a',
+  urgent: '#ff8562',
+  failed: '#ac9a91',
+
+  accent: '#ff8562',
+  backdrop: 'rgba(0,0,0,0.6)',
+  failedCardBg: '#2c2028',
+  failedCardBorder: '#4a3640',
+  trackBg: '#3d2c37',
+  urgentBorderAlpha: 'rgba(255,133,98,0.5)',
+  badgeFailedText: '#c9a99a',
+
+  badgeFreshBg: 'rgba(78,205,189,0.16)',
+  badgeMidBg: 'rgba(245,185,90,0.16)',
+  badgeUrgentBg: 'rgba(255,133,98,0.2)',
+
+  badgeInk: { fresh: '#4ecdbd', mid: '#f5b95a', urgent: '#ff8f6f' },
+  statusInk: { fresh: '#4ecdbd', mid: '#f5b95a', urgent: '#ff8562' },
 };
 
 // Pure-black CRT terminal — monochrome phosphor green with a single red
@@ -211,12 +318,12 @@ const terminalColors: Palette = {
   border: '#1c3d1c',
   text: '#baffc9',
   textDim: '#5ea86e',
-  textFaint: '#3d5c3d',
+  textFaint: '#5e8d5e',
 
   fresh: '#33ff66',
   mid: '#99ff33',
   urgent: '#ff3333',
-  failed: '#3d5c3d',
+  failed: '#598759',
 
   accent: '#ff3333',
   backdrop: 'rgba(0,0,0,0.7)',
@@ -224,16 +331,54 @@ const terminalColors: Palette = {
   failedCardBorder: '#1c3d1c',
   trackBg: '#0f1c0f',
   urgentBorderAlpha: 'rgba(255,51,51,0.5)',
+  badgeFailedText: '#6baf7a',
 
   badgeFreshBg: 'rgba(51,255,102,0.15)',
   badgeMidBg: 'rgba(153,255,51,0.15)',
   badgeUrgentBg: 'rgba(255,51,51,0.2)',
 
-  badgeInk: { fresh: '#00711c', mid: '#3a7400', urgent: '#460000', failed: '#7eaa7e' },
-  statusInk: { fresh: '#33ff66', mid: '#99ff33', urgent: '#ff3333', failed: '#578357' },
+  badgeInk: { fresh: '#00711c', mid: '#3a7400', urgent: '#460000' },
+  statusInk: { fresh: '#33ff66', mid: '#99ff33', urgent: '#ff3333' },
 };
 
-const palettes: Record<Scheme, Palette> = { dark: darkColors, light: lightColors };
+// Light twin of Terminal: pale green-tinted "printout paper" instead of a
+// pure-black CRT, deep phosphor-green ink, same red alarm hue darkened.
+const terminalLightColors: Palette = {
+  bg: '#eef7ee',
+  bgElevated: '#f7fdf7',
+  panel: '#f7fdf7',
+  panel2: '#e0f0e0',
+  border: '#1c3d1c',
+  text: '#0a2e0a',
+  textDim: '#2f6b2f',
+  textFaint: '#4f6f4f',
+
+  fresh: '#1f8f3f',
+  mid: '#5c8f1f',
+  urgent: '#c02020',
+  failed: '#4f6f4f',
+
+  accent: '#c02020',
+  backdrop: 'rgba(10,30,10,0.4)',
+  failedCardBg: '#e6f2e6',
+  failedCardBorder: '#bcd6bc',
+  trackBg: '#dceedc',
+  urgentBorderAlpha: 'rgba(192,32,32,0.35)',
+  badgeFailedText: '#255a25',
+
+  badgeFreshBg: 'rgba(31,143,63,0.14)',
+  badgeMidBg: 'rgba(92,143,31,0.16)',
+  badgeUrgentBg: 'rgba(192,32,32,0.16)',
+
+  badgeInk: { fresh: '#051509', mid: '#111b06', urgent: '#f8d8d8' },
+  statusInk: { fresh: '#1d853b', mid: '#527f1c', urgent: '#c02020' },
+};
+
+const defaultPalettes: Record<Scheme, Palette> = { dark: darkColors, light: lightColors };
+const brutalistPalettes: Record<Scheme, Palette> = { light: brutalistColors, dark: brutalistDarkColors };
+const neonArcadePalettes: Record<Scheme, Palette> = { dark: neonArcadeColors, light: neonArcadeLightColors };
+const sunrisePalettes: Record<Scheme, Palette> = { light: sunriseColors, dark: sunriseDarkColors };
+const terminalPalettes: Record<Scheme, Palette> = { dark: terminalColors, light: terminalLightColors };
 
 export function makeStatusColor(p: Palette): Record<TaskStatus, string> {
   return { done: p.fresh, fresh: p.fresh, mid: p.mid, urgent: p.urgent, failed: p.failed };
@@ -250,11 +395,23 @@ export function makeBadgeBg(p: Palette): Record<TaskStatus, string> {
 }
 
 export function makeBadgeInk(p: Palette): Record<TaskStatus, string> {
-  return { done: p.badgeInk.fresh, ...p.badgeInk };
+  return {
+    done: p.badgeInk.fresh,
+    fresh: p.badgeInk.fresh,
+    mid: p.badgeInk.mid,
+    urgent: p.badgeInk.urgent,
+    failed: p.badgeFailedText,
+  };
 }
 
 export function makeStatusInk(p: Palette): Record<TaskStatus, string> {
-  return { done: p.statusInk.fresh, ...p.statusInk };
+  return {
+    done: p.statusInk.fresh,
+    fresh: p.statusInk.fresh,
+    mid: p.statusInk.mid,
+    urgent: p.statusInk.urgent,
+    failed: p.failed,
+  };
 }
 
 // Countdown numbers and timestamps are monospace in the mockup.
@@ -319,10 +476,8 @@ export interface ThemeDefinition {
   id: ThemeId;
   label: string;
   description: string;
-  /** Omitted only for 'default', which follows the OS light/dark setting. */
-  scheme?: Scheme;
-  /** Omitted only for 'default', which resolves colors from `scheme` instead. */
-  colors?: Palette;
+  /** Every theme defines both a light and a dark Palette; `mode` in the theme store picks which one renders. */
+  colors: Record<Scheme, Palette>;
   shape: ThemeShape;
   type: ThemeType;
 }
@@ -342,7 +497,8 @@ export const THEME_REGISTRY: Record<ThemeId, ThemeDefinition> = {
   default: {
     id: 'default',
     label: 'Default',
-    description: 'Follows your device light/dark setting.',
+    description: 'Neutral grays — follows the Mode setting below.',
+    colors: defaultPalettes,
     shape: { radius: roundedRadius, hardEdges: false },
     type: defaultType,
   },
@@ -350,17 +506,15 @@ export const THEME_REGISTRY: Record<ThemeId, ThemeDefinition> = {
     id: 'brutalist',
     label: 'Brutalist Block',
     description: 'High-contrast paper & ink.',
-    scheme: 'light',
-    colors: brutalistColors,
+    colors: brutalistPalettes,
     shape: { radius: sharpRadius, hardEdges: true },
     type: defaultType,
   },
   neonArcade: {
     id: 'neonArcade',
     label: 'Neon Arcade',
-    description: 'Synthwave purple-black with magenta/cyan energy.',
-    scheme: 'dark',
-    colors: neonArcadeColors,
+    description: 'Synthwave purple with magenta/cyan energy.',
+    colors: neonArcadePalettes,
     shape: { radius: roundedRadius, hardEdges: false },
     type: {
       display: condensedDisplay,
@@ -375,9 +529,8 @@ export const THEME_REGISTRY: Record<ThemeId, ThemeDefinition> = {
   sunrise: {
     id: 'sunrise',
     label: 'Sunrise',
-    description: 'Warm cream & peach, coral and teal accents.',
-    scheme: 'light',
-    colors: sunriseColors,
+    description: 'Warm cream/peach or dusk plum, coral and teal accents.',
+    colors: sunrisePalettes,
     shape: { radius: roundedRadius, hardEdges: false },
     type: {
       display: serifDisplay,
@@ -390,9 +543,8 @@ export const THEME_REGISTRY: Record<ThemeId, ThemeDefinition> = {
   terminal: {
     id: 'terminal',
     label: 'Terminal',
-    description: 'Pure-black CRT, phosphor green, monospace throughout.',
-    scheme: 'dark',
-    colors: terminalColors,
+    description: 'CRT phosphor green, monospace throughout.',
+    colors: terminalPalettes,
     shape: { radius: terminalRadius, hardEdges: true },
     type: {
       display: mono,
@@ -410,19 +562,19 @@ export const THEME_REGISTRY: Record<ThemeId, ThemeDefinition> = {
 export const THEME_ORDER: ThemeId[] = ['default', 'brutalist', 'neonArcade', 'sunrise', 'terminal'];
 
 /**
- * Resolves the active theme. When the user has picked 'default' (the store's
- * initial value), this follows the OS appearance as before. Every other
- * ThemeId maps to a single fixed palette/shape/type regardless of OS scheme.
+ * Resolves the active theme. `mode` (light/dark) is a global concern owned by
+ * the theme store — seeded once from the OS appearance at store creation,
+ * then only changed by the user via the Profile screen's Mode toggle — and
+ * applies to whichever ThemeId is selected, including 'default'.
  */
 export function useTheme() {
   const themeId = useThemeStore((s) => s.themeId);
-  const osScheme: Scheme = useColorScheme() === 'light' ? 'light' : 'dark';
+  const mode = useThemeStore((s) => s.mode);
   const def = THEME_REGISTRY[themeId];
-  const scheme: Scheme = def.scheme ?? osScheme;
-  const colors = def.colors ?? palettes[scheme];
+  const colors = def.colors[mode];
   return useMemo(() => {
     return {
-      scheme,
+      scheme: mode,
       themeId,
       colors,
       statusColor: makeStatusColor(colors),
@@ -434,5 +586,5 @@ export function useTheme() {
       type: def.type,
       spacing,
     };
-  }, [themeId, scheme, colors, def]);
+  }, [themeId, mode, colors, def]);
 }
