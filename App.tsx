@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { AppState, Platform, StatusBar as RNStatusBar, StyleSheet, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useTaskStore } from './src/store/taskStore';
-import { ProfileScreen } from './src/ui/ProfileScreen';
+import { SettingsScreen } from './src/ui/SettingsScreen';
 import { Tab, TabBar } from './src/ui/TabBar';
 import { TimelineScreen } from './src/ui/TimelineScreen';
 import { Palette, useTheme } from './src/ui/theme';
@@ -44,7 +44,7 @@ function AppContent() {
   return (
     <View style={styles.container}>
       <View style={styles.screen}>
-        {activeTab === 'timeline' ? <TimelineScreen /> : <ProfileScreen />}
+        {activeTab === 'timeline' ? <TimelineScreen /> : <SettingsScreen />}
       </View>
       <TabBar activeTab={activeTab} onChange={setActiveTab} />
       <StatusBar style={scheme === 'light' ? 'dark' : 'light'} />

@@ -448,7 +448,7 @@ const terminalRadius: RadiusScale = { sheet: 12, box: 4, field: 4 };
 
 /**
  * Shape tokens: replaces the old scattered `isBrutalist ? X : Y` ternaries
- * duplicated across TaskCard/PipCard/TabBar/PetPicker/ProfileScreen/
+ * duplicated across TaskCard/PipCard/TabBar/PetPicker/SettingsScreen/
  * CommitModal/ConfirmModal/TimelineScreen. `hardEdges` themes get thicker
  * borders and a hard offset drop-shadow instead of none.
  */
@@ -489,7 +489,7 @@ const defaultType: ThemeType = {
 
 /**
  * Single source of truth for every theme: palette, shape, and typography.
- * `useTheme()` and the Profile screen's picker both read this — adding or
+ * `useTheme()` and the Settings screen's picker both read this — adding or
  * changing a theme only ever means editing an entry here.
  */
 export const THEME_REGISTRY: Record<ThemeId, ThemeDefinition> = {
@@ -555,13 +555,13 @@ export const THEME_REGISTRY: Record<ThemeId, ThemeDefinition> = {
   },
 };
 
-/** Display order for the Profile screen's theme picker. */
+/** Display order for the Settings screen's theme picker. */
 export const THEME_ORDER: ThemeId[] = ['default', 'brutalist', 'neonArcade', 'sunrise', 'terminal'];
 
 /**
  * Resolves the active theme. `mode` (light/dark) is a global concern owned by
  * the theme store — seeded once from the OS appearance at store creation,
- * then only changed by the user via the Profile screen's Mode toggle — and
+ * then only changed by the user via the Settings screen's Mode toggle — and
  * applies to whichever ThemeId is selected, including 'default'.
  */
 export function useTheme() {

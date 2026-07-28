@@ -10,7 +10,7 @@ const MODE_OPTIONS: { value: ModePreference; label: string; description: string 
   { value: 'dark', label: 'Dark', description: 'Dark background, light text.' },
 ];
 
-export function ProfileScreen() {
+export function SettingsScreen() {
   const { colors, shape, type } = useTheme();
   const themeId = useThemeStore((s) => s.themeId);
   const setThemeId = useThemeStore((s) => s.setThemeId);
@@ -21,8 +21,7 @@ export function ProfileScreen() {
   return (
     <ScrollView style={styles.root} contentContainerStyle={styles.rootContent}>
       <View style={styles.header}>
-        <Text style={styles.title}>Profile</Text>
-        <Text style={styles.sub}>Settings</Text>
+        <Text style={styles.title}>Settings</Text>
       </View>
 
       <Text style={styles.sectionLabel}>Mode</Text>
@@ -99,11 +98,6 @@ function makeStyles(colors: Palette, shape: ThemeShape, type: ThemeType) {
       fontWeight: type.titleWeight,
       letterSpacing: type.titleTracking,
       textTransform: type.titleCase,
-    },
-    sub: {
-      color: colors.textDim,
-      fontSize: 13,
-      marginTop: 2,
     },
     sectionLabel: {
       color: colors.textFaint,
