@@ -2,23 +2,37 @@ import { Appearance } from 'react-native';
 import { create } from 'zustand';
 import type { Scheme, ThemeId } from '../ui/theme';
 
+/** The user's Mode choice: an explicit scheme, or 'system' to follow the OS. */
+export type ModePreference = Scheme | 'system';
+
+function resolveSystemScheme(): Scheme {
+  return Appearance.getColorScheme() === 'light' ? 'light' : 'dark';
+}
+
 export interface ThemeStore {
   themeId: ThemeId;
   setThemeId: (id: ThemeId) => void;
+  /** The raw user choice — 'light' | 'dark' | 'system' — shown selected in the Mode picker. */
+  modePreference: ModePreference;
+  /** The resolved light/dark scheme every themed component actually renders with. */
   mode: Scheme;
-  setMode: (mode: Scheme) => void;
-  toggleMode: () => void;
+  setModePreference: (pref: ModePreference) => void;
 }
-
-// Seeds the initial mode from the OS appearance exactly once, at store
-// creation. After this the store's `mode` is the sole source of truth —
-// there is no per-render OS re-read (see useTheme() in ui/theme.ts).
-const initialMode: Scheme = Appearance.getColorScheme() === 'light' ? 'light' : 'dark';
 
 export const useThemeStore = create<ThemeStore>((set) => ({
   themeId: 'default',
   setThemeId: (id) => set({ themeId: id }),
-  mode: initialMode,
-  setMode: (mode) => set({ mode }),
-  toggleMode: () => set((s) => ({ mode: s.mode === 'light' ? 'dark' : 'light' })),
+  modePreference: 'system',
+  mode: resolveSystemScheme(),
+  setModePreference: (pref) =>
+    set({ modePreference: pref, mode: pref === 'system' ? resolveSystemScheme() : pref }),
 }));
+
+// Keeps the resolved `mode` synced to live OS appearance changes while the
+// user's preference is 'system'. A 'light'/'dark' preference is user-locked
+// and this listener leaves it alone.
+Appearance.addChangeListener(({ colorScheme }) => {
+  if (useThemeStore.getState().modePreference === 'system') {
+    useThemeStore.setState({ mode: colorScheme === 'light' ? 'light' : 'dark' });
+  }
+});
