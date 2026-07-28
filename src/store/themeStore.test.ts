@@ -1,3 +1,8 @@
+// themeStore persists themeId/modePreference via settingsRepository's
+// SQLiteSettingsRepository, which calls into the native expo-sqlite module —
+// unavailable under Jest. The repo-root __mocks__/expo-sqlite.js manual mock
+// stands in for it automatically (no jest.mock() call needed here).
+
 describe('themeStore', () => {
   it('seeds mode from the OS color scheme at creation time (light)', () => {
     let mode: string;
@@ -82,5 +87,64 @@ describe('themeStore', () => {
       mode = useThemeStore.getState().mode;
     });
     expect(mode!).toBe('dark');
+  });
+
+  it('seeds themeId and modePreference from previously persisted settings (survives a force-close)', () => {
+    let themeId: string;
+    let modePreference: string;
+    let mode: string;
+    jest.isolateModules(() => {
+      // Simulates a prior app session having stored a choice: write straight
+      // to the settings table before themeStore's module-load-time seeding
+      // reads from it.
+      const { SQLiteSettingsRepository } = require('./settingsRepository');
+      const repo = new SQLiteSettingsRepository('pactpal.db');
+      repo.set('themeId', 'brutalist');
+      repo.set('modePreference', 'dark');
+
+      const { useThemeStore } = require('./themeStore');
+      themeId = useThemeStore.getState().themeId;
+      modePreference = useThemeStore.getState().modePreference;
+      mode = useThemeStore.getState().mode;
+    });
+    expect(themeId!).toBe('brutalist');
+    expect(modePreference!).toBe('dark');
+    expect(mode!).toBe('dark');
+  });
+
+  it('falls back to defaults when no themeId/modePreference was ever persisted', () => {
+    let themeId: string;
+    let modePreference: string;
+    jest.isolateModules(() => {
+      const { useThemeStore } = require('./themeStore');
+      themeId = useThemeStore.getState().themeId;
+      modePreference = useThemeStore.getState().modePreference;
+    });
+    expect(themeId!).toBe('default');
+    expect(modePreference!).toBe('system');
+  });
+
+  it('setThemeId writes through to the settings repository', () => {
+    let storedThemeId: string | undefined;
+    jest.isolateModules(() => {
+      const { useThemeStore } = require('./themeStore');
+      useThemeStore.getState().setThemeId('sunrise');
+
+      const { SQLiteSettingsRepository } = require('./settingsRepository');
+      storedThemeId = new SQLiteSettingsRepository('pactpal.db').get('themeId');
+    });
+    expect(storedThemeId).toBe('sunrise');
+  });
+
+  it('setModePreference writes through to the settings repository', () => {
+    let storedModePreference: string | undefined;
+    jest.isolateModules(() => {
+      const { useThemeStore } = require('./themeStore');
+      useThemeStore.getState().setModePreference('light');
+
+      const { SQLiteSettingsRepository } = require('./settingsRepository');
+      storedModePreference = new SQLiteSettingsRepository('pactpal.db').get('modePreference');
+    });
+    expect(storedModePreference).toBe('light');
   });
 });
