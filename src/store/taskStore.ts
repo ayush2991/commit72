@@ -1,19 +1,20 @@
 import { create } from 'zustand';
-import { InMemoryTaskRepository } from '../task/taskRepository';
+import { SQLiteTaskRepository } from '../task/taskRepository';
 import { TaskService } from '../task/taskService';
 import { Task, TaskDurationHours } from '../task/types';
 
 /**
- * The store owns a single TaskService over the in-memory repository. The
- * service is the source of truth; `tasks`/`now` in the store are a cache of it
- * that React subscribes to. Every mutating action re-pulls from the repository
- * so the list can never drift from the service's state.
+ * The store owns a single TaskService over the SQLite-backed repository (see
+ * TECH_DESIGN.md §1/§3). The service is the source of truth; `tasks`/`now` in
+ * the store are a cache of it that React subscribes to. Every mutating action
+ * re-pulls from the repository so the list can never drift from the
+ * service's state.
  *
- * Swapping InMemoryTaskRepository for the future expo-sqlite repository (see
- * TECH_DESIGN.md §1/§3) is a one-line change here — nothing else in the UI
- * depends on the storage engine.
+ * Tasks survive the app process being killed since expo-sqlite persists to
+ * disk on-device — they're cleared only when the app is uninstalled, not on
+ * every launch as InMemoryTaskRepository (still used in tests) would.
  */
-const repository = new InMemoryTaskRepository();
+const repository = new SQLiteTaskRepository();
 
 // Dev-only: compress the 72h window so the whole lifecycle
 // (fresh → mid → urgent → failed → auto-deleted) plays out in a couple of
