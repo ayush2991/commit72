@@ -24,6 +24,22 @@ function moodColor(mood: PetMood, colors: Palette): string {
   }
 }
 
+// Text needs its own ink, tuned against the panel background — the vivid
+// moodColor() above stays reserved for the health-bar fill, which has no
+// contrast requirement.
+function moodInkColor(mood: PetMood, colors: Palette): string {
+  switch (mood) {
+    case 'fading':
+    case 'worried':
+      return colors.statusInk.urgent;
+    case 'steady':
+      return colors.statusInk.mid;
+    case 'happy':
+    case 'thriving':
+      return colors.statusInk.fresh;
+  }
+}
+
 /**
  * Pip's health (see src/pet/petHealth.ts) is derived from tasks currently in
  * the list: kept/broken are the counts of done/failed tasks in view right
@@ -38,6 +54,7 @@ export function PipCard({ live, kept, broken }: Props) {
   const mood = moodForHealth(health);
   const copy = pet.moodCopy[mood];
   const accent = moodColor(mood, colors);
+  const labelInk = moodInkColor(mood, colors);
   const styles = useMemo(
     () => makeStyles(colors, mono, shape, type),
     [colors, mono, shape, type]
@@ -48,7 +65,7 @@ export function PipCard({ live, kept, broken }: Props) {
       <View style={styles.faceWrap}>
         <pet.Face mood={mood} />
       </View>
-      <Text style={[styles.moodLabel, { color: accent }]}>{copy.label.toUpperCase()}</Text>
+      <Text style={[styles.moodLabel, { color: labelInk }]}>{copy.label.toUpperCase()}</Text>
       <Text style={styles.flavor}>{copy.flavor}</Text>
 
       <View style={styles.healthRow}>

@@ -21,7 +21,7 @@ interface Props {
  * ticking `now` from the store animates it fresh → mid → urgent → failed.
  */
 export function TaskCard({ task, now }: Props) {
-  const { colors, statusColor, badgeBg, mono, shape, type } = useTheme();
+  const { colors, statusColor, badgeBg, badgeInk, statusInk, mono, shape, type } = useTheme();
   const styles = useMemo(
     () => makeStyles(colors, mono, shape, type),
     [colors, mono, shape, type]
@@ -34,25 +34,22 @@ export function TaskCard({ task, now }: Props) {
   const isDone = status === 'done';
   const isHot = status === 'urgent' || isFailed;
 
-  // Hard-edged themes (Brutalist, Terminal) use solid-color chips with ink
-  // text, rather than the default theme's tinted-background + colored-text
-  // badge, and only tint the countdown for hot statuses — everything else
-  // reads in plain ink. Failed badges always use the dedicated
-  // failedCardBorder/badgeFailedText pair (matching the failed card's own
-  // border color) regardless of hardEdges, since colors.failed is tuned for
-  // legibility as countdown text and can't also serve as a badge background
-  // in dark hard-edged themes without falling below contrast requirements.
+  // Hard-edged themes (Brutalist, Terminal) use solid-color chips, other
+  // themes use a tinted-background chip; badgeInk is tuned per-theme against
+  // whichever chip style is actually rendered. Failed badges always use the
+  // dedicated failedCardBorder/badgeFailedText pair (matching the failed
+  // card's own border color) regardless of hardEdges, since colors.failed is
+  // tuned for legibility as countdown text and can't also serve as a badge
+  // background in dark hard-edged themes without falling below contrast
+  // requirements. Countdown text only tints for hot statuses — everything
+  // else reads in plain ink.
   const badgeBackground = isFailed
     ? colors.failedCardBorder
     : shape.hardEdges
       ? color
       : badgeBg[status];
-  const badgeTextColor = isFailed
-    ? colors.badgeFailedText
-    : shape.hardEdges
-      ? colors.text
-      : color;
-  const countdownColor = shape.hardEdges ? (isHot ? color : colors.text) : color;
+  const badgeTextColor = badgeInk[status];
+  const countdownColor = isHot ? statusInk[status] : colors.text;
   const badgeLabel = `${type.badgeDecoration?.prefix ?? ''}${statusLabel(status)}${
     type.badgeDecoration?.suffix ?? ''
   }`;
