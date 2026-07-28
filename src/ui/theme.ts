@@ -27,11 +27,17 @@ export interface Palette {
   failedCardBorder: string;
   trackBg: string;
   urgentBorderAlpha: string;
-  badgeFailedText: string;
 
   badgeFreshBg: string;
   badgeMidBg: string;
   badgeUrgentBg: string;
+
+  /** Text color for the status badge chip — tuned per-theme against that
+   * theme's actual chip background (tinted or solid), not the raw status hue. */
+  badgeInk: { fresh: string; mid: string; urgent: string; failed: string };
+  /** Text color for a status hue painted directly on a plain surface (no
+   * chip), e.g. the pet mood label and the hot countdown text. */
+  statusInk: { fresh: string; mid: string; urgent: string; failed: string };
 }
 
 /**
@@ -60,11 +66,13 @@ const darkColors: Palette = {
   failedCardBorder: '#2a2b2f',
   trackBg: '#232429',
   urgentBorderAlpha: 'rgba(244,71,52,0.5)',
-  badgeFailedText: '#8c8e94',
 
   badgeFreshBg: 'rgba(61,220,132,0.15)',
   badgeMidBg: 'rgba(245,197,66,0.15)',
   badgeUrgentBg: 'rgba(244,71,52,0.18)',
+
+  badgeInk: { fresh: '#3ddc84', mid: '#f5c542', urgent: '#f55846', failed: '#8f9299' },
+  statusInk: { fresh: '#3ddc84', mid: '#f5c542', urgent: '#f44734', failed: '#7b7f88' },
 };
 
 const lightColors: Palette = {
@@ -88,11 +96,13 @@ const lightColors: Palette = {
   failedCardBorder: '#dcdce0',
   trackBg: '#e6e6ea',
   urgentBorderAlpha: 'rgba(216,50,30,0.35)',
-  badgeFailedText: '#6b6e76',
 
   badgeFreshBg: 'rgba(31,162,90,0.12)',
   badgeMidBg: 'rgba(163,118,10,0.12)',
   badgeUrgentBg: 'rgba(216,50,30,0.14)',
+
+  badgeInk: { fresh: '#187d45', mid: '#8c6509', urgent: '#c52e1b', failed: '#5d6069' },
+  statusInk: { fresh: '#1a864b', mid: '#996f09', urgent: '#d8321e', failed: '#6b6e78' },
 };
 
 // Lifted from the "1e — BLOCK" mockup option (Commit72.dc.html): a fixed
@@ -118,11 +128,13 @@ const brutalistColors: Palette = {
   failedCardBorder: '#3a3a3a',
   trackBg: '#d9d4c6',
   urgentBorderAlpha: 'rgba(255,59,25,0.5)',
-  badgeFailedText: '#5c5a53',
 
   badgeFreshBg: 'rgba(77,77,255,0.16)',
   badgeMidBg: 'rgba(0,168,107,0.16)',
   badgeUrgentBg: 'rgba(255,59,25,0.18)',
+
+  badgeInk: { fresh: '#e8e8ff', mid: '#003220', urgent: '#460a00', failed: '#a4a4a4' },
+  statusInk: { fresh: '#4d4dff', mid: '#008857', urgent: '#e62200', failed: '#5e5e5e' },
 };
 
 // Deep purple-black void with magenta/cyan neon accents — an arcade-cabinet
@@ -148,11 +160,13 @@ const neonArcadeColors: Palette = {
   failedCardBorder: '#3d0a6b',
   trackBg: '#24044a',
   urgentBorderAlpha: 'rgba(255,46,136,0.5)',
-  badgeFailedText: '#b9a4d9',
 
   badgeFreshBg: 'rgba(57,255,158,0.16)',
   badgeMidBg: 'rgba(255,225,77,0.16)',
   badgeUrgentBg: 'rgba(255,46,136,0.2)',
+
+  badgeInk: { fresh: '#39ff9e', mid: '#ffe14d', urgent: '#ff3f92', failed: '#988ca8' },
+  statusInk: { fresh: '#39ff9e', mid: '#ffe14d', urgent: '#ff2e88', failed: '#837495' },
 };
 
 // Warm cream/peach with coral + teal accents — optimistic morning light,
@@ -178,11 +192,13 @@ const sunriseColors: Palette = {
   failedCardBorder: '#e3c3a0',
   trackBg: '#ffe9d6',
   urgentBorderAlpha: 'rgba(232,97,63,0.35)',
-  badgeFailedText: '#8a6f5c',
 
   badgeFreshBg: 'rgba(42,157,143,0.14)',
   badgeMidBg: 'rgba(233,161,59,0.16)',
   badgeUrgentBg: 'rgba(232,97,63,0.16)',
+
+  badgeInk: { fresh: '#20766b', mid: '#965f11', urgent: '#be3817', failed: '#644f40' },
+  statusInk: { fresh: '#228175', mid: '#a06512', urgent: '#d33f19', failed: '#7e6451' },
 };
 
 // Pure-black CRT terminal — monochrome phosphor green with a single red
@@ -208,11 +224,13 @@ const terminalColors: Palette = {
   failedCardBorder: '#1c3d1c',
   trackBg: '#0f1c0f',
   urgentBorderAlpha: 'rgba(255,51,51,0.5)',
-  badgeFailedText: '#5ea86e',
 
   badgeFreshBg: 'rgba(51,255,102,0.15)',
   badgeMidBg: 'rgba(153,255,51,0.15)',
   badgeUrgentBg: 'rgba(255,51,51,0.2)',
+
+  badgeInk: { fresh: '#00711c', mid: '#3a7400', urgent: '#460000', failed: '#7eaa7e' },
+  statusInk: { fresh: '#33ff66', mid: '#99ff33', urgent: '#ff3333', failed: '#578357' },
 };
 
 const palettes: Record<Scheme, Palette> = { dark: darkColors, light: lightColors };
@@ -229,6 +247,14 @@ export function makeBadgeBg(p: Palette): Record<TaskStatus, string> {
     urgent: p.badgeUrgentBg,
     failed: p.failedCardBorder,
   };
+}
+
+export function makeBadgeInk(p: Palette): Record<TaskStatus, string> {
+  return { done: p.badgeInk.fresh, ...p.badgeInk };
+}
+
+export function makeStatusInk(p: Palette): Record<TaskStatus, string> {
+  return { done: p.statusInk.fresh, ...p.statusInk };
 }
 
 // Countdown numbers and timestamps are monospace in the mockup.
@@ -401,6 +427,8 @@ export function useTheme() {
       colors,
       statusColor: makeStatusColor(colors),
       badgeBg: makeBadgeBg(colors),
+      badgeInk: makeBadgeInk(colors),
+      statusInk: makeStatusInk(colors),
       mono,
       shape: def.shape,
       type: def.type,
