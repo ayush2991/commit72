@@ -1,13 +1,22 @@
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useMemo, useState } from 'react';
 import { AppState, Platform, StatusBar as RNStatusBar, StyleSheet, View } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useTaskStore } from './src/store/taskStore';
 import { ProfileScreen } from './src/ui/ProfileScreen';
-import { Tab, TabBar, TAB_BAR_HEIGHT } from './src/ui/TabBar';
+import { Tab, TabBar } from './src/ui/TabBar';
 import { TimelineScreen } from './src/ui/TimelineScreen';
 import { Palette, useTheme } from './src/ui/theme';
 
 export default function App() {
+  return (
+    <SafeAreaProvider>
+      <AppContent />
+    </SafeAreaProvider>
+  );
+}
+
+function AppContent() {
   const { scheme, colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const sweep = useTaskStore((s) => s.sweep);
@@ -53,7 +62,6 @@ function makeStyles(colors: Palette) {
     },
     screen: {
       flex: 1,
-      paddingBottom: TAB_BAR_HEIGHT,
     },
   });
 }

@@ -1,6 +1,8 @@
+import { Feather } from '@expo/vector-icons';
 import { useMemo } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { Palette, ThemeType, useTheme } from './theme';
+import { Pressable, StyleSheet, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Palette, ThemeShape, useTheme } from './theme';
 
 export type Tab = 'timeline' | 'profile';
 
@@ -9,24 +11,35 @@ interface Props {
   onChange: (tab: Tab) => void;
 }
 
-const TABS: { id: Tab; label: string; glyph: string }[] = [
-  { id: 'timeline', label: 'Timeline', glyph: '⏱' },
-  { id: 'profile', label: 'Profile', glyph: '☺' },
+const TABS: { id: Tab; label: string; icon: keyof typeof Feather.glyphMap }[] = [
+  { id: 'timeline', label: 'Timeline', icon: 'clock' },
+  { id: 'profile', label: 'Profile', icon: 'user' },
 ];
 
+const ICON_SIZE = 22;
+const BAR_CONTENT_HEIGHT = 52;
+
 export function TabBar({ activeTab, onChange }: Props) {
-  const { colors, shape, type } = useTheme();
-  const styles = useMemo(() => makeStyles(colors, shape.hardEdges, type), [colors, shape, type]);
+  const { colors, shape } = useTheme();
+  const insets = useSafeAreaInsets();
+  const styles = useMemo(() => makeStyles(colors, shape, insets.bottom), [colors, shape, insets.bottom]);
 
   return (
     <View style={styles.bar}>
       {TABS.map((tab) => {
         const active = tab.id === activeTab;
-        const label = active && type.tabActivePrefix ? `${type.tabActivePrefix}${tab.label}` : tab.label;
         return (
-          <Pressable key={tab.id} style={styles.tab} onPress={() => onChange(tab.id)}>
-            <Text style={[styles.glyph, active && styles.glyphActive]}>{tab.glyph}</Text>
-            <Text style={[styles.label, active && styles.labelActive]}>{label}</Text>
+          <Pressable
+            key={tab.id}
+            style={styles.tab}
+            onPress={() => onChange(tab.id)}
+            accessibilityRole="tab"
+            accessibilityState={{ selected: active }}
+            accessibilityLabel={tab.label}
+          >
+            <View style={[styles.iconWrap, active && styles.iconWrapActive]}>
+              <Feather name={tab.icon} size={ICON_SIZE} color={active ? colors.accent : colors.textFaint} />
+            </View>
           </Pressable>
         );
       })}
@@ -34,42 +47,30 @@ export function TabBar({ activeTab, onChange }: Props) {
   );
 }
 
-export const TAB_BAR_HEIGHT = 64;
-
-function makeStyles(colors: Palette, hardEdges: boolean, type: ThemeType) {
+function makeStyles(colors: Palette, shape: ThemeShape, insetBottom: number) {
   return StyleSheet.create({
     bar: {
-      position: 'absolute',
-      left: 0,
-      right: 0,
-      bottom: 0,
-      height: TAB_BAR_HEIGHT,
       flexDirection: 'row',
+      height: BAR_CONTENT_HEIGHT + insetBottom,
+      paddingBottom: insetBottom,
       backgroundColor: colors.bgElevated,
-      borderTopWidth: hardEdges ? 3 : 1,
+      borderTopWidth: shape.hardEdges ? 3 : 1,
       borderTopColor: colors.border,
     },
     tab: {
       flex: 1,
       alignItems: 'center',
       justifyContent: 'center',
-      gap: 2,
     },
-    glyph: {
-      fontSize: 18,
-      color: colors.textFaint,
+    iconWrap: {
+      width: 48,
+      height: 36,
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderRadius: shape.hardEdges ? shape.radius.box : 999,
     },
-    glyphActive: {
-      color: colors.accent,
-    },
-    label: {
-      fontFamily: type.body,
-      fontSize: 11,
-      fontWeight: '600',
-      color: colors.textFaint,
-    },
-    labelActive: {
-      color: colors.text,
+    iconWrapActive: {
+      backgroundColor: colors.panel2,
     },
   });
 }
