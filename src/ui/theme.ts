@@ -469,7 +469,6 @@ export interface ThemeType {
   titleTracking: number;
   titleCase: 'none' | 'uppercase';
   badgeDecoration?: { prefix?: string; suffix?: string };
-  tabActivePrefix?: string;
 }
 
 export interface ThemeDefinition {
@@ -523,7 +522,6 @@ export const THEME_REGISTRY: Record<ThemeId, ThemeDefinition> = {
       titleTracking: 2.5,
       titleCase: 'uppercase',
       badgeDecoration: { prefix: '▸ ' },
-      tabActivePrefix: '▸ ',
     },
   },
   sunrise: {
@@ -553,7 +551,6 @@ export const THEME_REGISTRY: Record<ThemeId, ThemeDefinition> = {
       titleTracking: 0.5,
       titleCase: 'none',
       badgeDecoration: { prefix: '[', suffix: ']' },
-      tabActivePrefix: '> ',
     },
   },
 };
