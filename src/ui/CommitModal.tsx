@@ -21,6 +21,7 @@ interface Props {
   visible: boolean;
   onClose: () => void;
   onCommit: (title: string, durationHours: TaskDurationHours) => void;
+  remaining: number;
 }
 
 /**
@@ -28,7 +29,7 @@ interface Props {
  * Framed as a deliberate act, not a quick add — the 72:00 preview and the
  * "can't be paused" note come straight from the mockup copy.
  */
-export function CommitModal({ visible, onClose, onCommit }: Props) {
+export function CommitModal({ visible, onClose, onCommit, remaining }: Props) {
   const { colors, mono, shape } = useTheme();
   const { radius, hardEdges } = shape;
   const styles = useMemo(
@@ -77,6 +78,9 @@ export function CommitModal({ visible, onClose, onCommit }: Props) {
           <Text style={styles.copy}>
             What will you finish in the next {durationHours} hours? Once you
             commit, the clock doesn&apos;t stop.
+          </Text>
+          <Text style={[styles.capNote, remaining <= 1 && styles.capNoteLow]}>
+            {remaining === 1 ? '1 task remaining' : `${remaining} tasks remaining`}
           </Text>
 
           <TextInput
@@ -184,6 +188,14 @@ function makeStyles(
       color: colors.textDim,
       fontSize: 13,
       lineHeight: 20,
+    },
+    capNote: {
+      color: colors.textDim,
+      fontSize: 12,
+      fontWeight: '700',
+    },
+    capNoteLow: {
+      color: colors.urgent,
     },
     input: {
       backgroundColor: colors.panel,

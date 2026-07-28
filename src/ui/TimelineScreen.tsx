@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { countTaskStatuses, deriveStatus } from '../task/deriveStatus';
-import { Task } from '../task/types';
+import { DEFAULT_TASK_CAP, Task } from '../task/types';
 import { useTaskStore } from '../store/taskStore';
 import { CommitModal } from './CommitModal';
 import { ConfirmAction, ConfirmModal } from './ConfirmModal';
@@ -33,6 +33,7 @@ export function TimelineScreen() {
 
   const ordered = useMemo(() => sortForTimeline(tasks, now), [tasks, now]);
   const counts = useMemo(() => countTaskStatuses(tasks, now), [tasks, now]);
+  const remaining = Math.max(0, DEFAULT_TASK_CAP - counts.active);
 
   // Tap a card to act on it. The available actions depend on the derived
   // status, keeping the lifecycle rules from TaskService reachable from the UI.
@@ -92,6 +93,9 @@ export function TimelineScreen() {
             ? '1 active commitment'
             : `${counts.active} active commitments`}
         </Text>
+        <Text style={[styles.remaining, remaining <= 1 && styles.remainingLow]}>
+          {remaining === 1 ? '1 task remaining' : `${remaining} tasks remaining`}
+        </Text>
       </View>
 
       <FlatList
@@ -125,6 +129,7 @@ export function TimelineScreen() {
         visible={modalOpen}
         onClose={() => setModalOpen(false)}
         onCommit={commit}
+        remaining={remaining}
       />
 
       <ConfirmModal
@@ -170,6 +175,14 @@ function makeStyles(colors: Palette, hardEdges: boolean, type: ThemeType) {
       color: colors.textDim,
       fontSize: 13,
       marginTop: 2,
+    },
+    remaining: {
+      color: colors.textDim,
+      fontSize: 13,
+      marginTop: 2,
+    },
+    remainingLow: {
+      color: colors.urgent,
     },
     list: {
       gap: 12,
