@@ -110,7 +110,7 @@ export function TimelineScreen() {
           <View style={styles.empty}>
             <Text style={styles.emptyTitle}>Nothing committed yet</Text>
             <Text style={styles.emptyBody}>
-              Tap + to start a 72-hour clock.
+              Tap + to make a new pact.
             </Text>
           </View>
         }
