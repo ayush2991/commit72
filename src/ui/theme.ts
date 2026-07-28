@@ -47,12 +47,12 @@ const darkColors: Palette = {
   border: '#26282f',
   text: '#f4f4f5',
   textDim: '#8a8d96',
-  textFaint: '#54575f',
+  textFaint: '#838791',
 
   fresh: '#3ddc84',
   mid: '#f5c542',
   urgent: '#f44734', // hsl(6 90% 58%)
-  failed: '#6b6e76',
+  failed: '#7c8088',
 
   accent: '#f2643a', // hsl(6 85% 55%)
   backdrop: 'rgba(0,0,0,0.55)',
@@ -60,7 +60,7 @@ const darkColors: Palette = {
   failedCardBorder: '#2a2b2f',
   trackBg: '#232429',
   urgentBorderAlpha: 'rgba(244,71,52,0.5)',
-  badgeFailedText: '#8c8e94',
+  badgeFailedText: '#919399',
 
   badgeFreshBg: 'rgba(61,220,132,0.15)',
   badgeMidBg: 'rgba(245,197,66,0.15)',
@@ -75,12 +75,12 @@ const lightColors: Palette = {
   border: '#e2e2e6',
   text: '#0d0e12',
   textDim: '#5c5f68',
-  textFaint: '#9296a0',
+  textFaint: '#686d78',
 
   fresh: '#1fa25a',
   mid: '#a3760a',
   urgent: '#d8321e',
-  failed: '#9a9da5',
+  failed: '#696c75',
 
   accent: '#d8321e',
   backdrop: 'rgba(0,0,0,0.35)',
@@ -88,7 +88,7 @@ const lightColors: Palette = {
   failedCardBorder: '#dcdce0',
   trackBg: '#e6e6ea',
   urgentBorderAlpha: 'rgba(216,50,30,0.35)',
-  badgeFailedText: '#6b6e76',
+  badgeFailedText: '#5c5f66',
 
   badgeFreshBg: 'rgba(31,162,90,0.12)',
   badgeMidBg: 'rgba(163,118,10,0.12)',
@@ -105,12 +105,12 @@ const brutalistColors: Palette = {
   border: '#111111',
   text: '#111111',
   textDim: '#5c5a53',
-  textFaint: '#8a8a8a',
+  textFaint: '#5f5f5f',
 
   fresh: '#4d4dff',
   mid: '#00a86b',
   urgent: '#ff3b19',
-  failed: '#8a8a8a',
+  failed: '#5c5c5c',
 
   accent: '#ff3b19',
   backdrop: 'rgba(17,17,17,0.55)',
@@ -118,7 +118,7 @@ const brutalistColors: Palette = {
   failedCardBorder: '#3a3a3a',
   trackBg: '#d9d4c6',
   urgentBorderAlpha: 'rgba(255,59,25,0.5)',
-  badgeFailedText: '#5c5a53',
+  badgeFailedText: '#a6a49d',
 
   badgeFreshBg: 'rgba(77,77,255,0.16)',
   badgeMidBg: 'rgba(0,168,107,0.16)',
@@ -135,7 +135,7 @@ const brutalistDarkColors: Palette = {
   border: '#f2f0e6',
   text: '#f2f0e6',
   textDim: '#c4c0b3',
-  textFaint: '#8a8a8a',
+  textFaint: '#909090',
 
   fresh: '#7a7aff',
   mid: '#00c880',
@@ -148,7 +148,7 @@ const brutalistDarkColors: Palette = {
   failedCardBorder: '#4a4a4a',
   trackBg: '#2a2a2a',
   urgentBorderAlpha: 'rgba(255,90,58,0.5)',
-  badgeFailedText: '#9a9a9a',
+  badgeFailedText: '#c0c0c0',
 
   badgeFreshBg: 'rgba(122,122,255,0.18)',
   badgeMidBg: 'rgba(0,200,128,0.18)',
@@ -165,12 +165,12 @@ const neonArcadeColors: Palette = {
   border: '#3d0a6b',
   text: '#f5eaff',
   textDim: '#b9a4d9',
-  textFaint: '#7c6a99',
+  textFaint: '#8c7ca5',
 
   fresh: '#39ff9e',
   mid: '#ffe14d',
   urgent: '#ff2e88',
-  failed: '#6f6180',
+  failed: '#867798',
 
   accent: '#ff2e88',
   backdrop: 'rgba(10,0,20,0.65)',
@@ -195,12 +195,12 @@ const neonArcadeLightColors: Palette = {
   border: '#caa8f0',
   text: '#1a0330',
   textDim: '#6b4f94',
-  textFaint: '#9c85bd',
+  textFaint: '#6f5a90',
 
   fresh: '#0e9e63',
   mid: '#b8860a',
   urgent: '#d1146b',
-  failed: '#9c85bd',
+  failed: '#6f5a90',
 
   accent: '#d1146b',
   backdrop: 'rgba(26,3,48,0.35)',
@@ -208,7 +208,7 @@ const neonArcadeLightColors: Palette = {
   failedCardBorder: '#d8c2f0',
   trackBg: '#e6d5f7',
   urgentBorderAlpha: 'rgba(209,20,107,0.35)',
-  badgeFailedText: '#6b4f94',
+  badgeFailedText: '#64488c',
 
   badgeFreshBg: 'rgba(14,158,99,0.14)',
   badgeMidBg: 'rgba(184,134,10,0.16)',
@@ -224,13 +224,13 @@ const sunriseColors: Palette = {
   panel2: '#ffe9d6',
   border: '#f3c9a8',
   text: '#3a2a20',
-  textDim: '#8a6f5c',
-  textFaint: '#b89a82',
+  textDim: '#876d5a',
+  textFaint: '#84644b',
 
   fresh: '#2a9d8f',
   mid: '#e9a13b',
   urgent: '#e8613f',
-  failed: '#b8a190',
+  failed: '#7a614e',
 
   accent: '#e8613f',
   backdrop: 'rgba(58,42,32,0.35)',
@@ -238,7 +238,7 @@ const sunriseColors: Palette = {
   failedCardBorder: '#e3c3a0',
   trackBg: '#ffe9d6',
   urgentBorderAlpha: 'rgba(232,97,63,0.35)',
-  badgeFailedText: '#8a6f5c',
+  badgeFailedText: '#624f41',
 
   badgeFreshBg: 'rgba(42,157,143,0.14)',
   badgeMidBg: 'rgba(233,161,59,0.16)',
@@ -255,12 +255,12 @@ const sunriseDarkColors: Palette = {
   border: '#5a4048',
   text: '#fbe9dc',
   textDim: '#c9a99a',
-  textFaint: '#8f7268',
+  textFaint: '#ac9a91',
 
   fresh: '#4ecdbd',
   mid: '#f5b95a',
   urgent: '#ff8562',
-  failed: '#8f7268',
+  failed: '#ac9a91',
 
   accent: '#ff8562',
   backdrop: 'rgba(0,0,0,0.6)',
@@ -285,12 +285,12 @@ const terminalColors: Palette = {
   border: '#1c3d1c',
   text: '#baffc9',
   textDim: '#5ea86e',
-  textFaint: '#3d5c3d',
+  textFaint: '#5e8d5e',
 
   fresh: '#33ff66',
   mid: '#99ff33',
   urgent: '#ff3333',
-  failed: '#3d5c3d',
+  failed: '#598759',
 
   accent: '#ff3333',
   backdrop: 'rgba(0,0,0,0.7)',
@@ -298,7 +298,7 @@ const terminalColors: Palette = {
   failedCardBorder: '#1c3d1c',
   trackBg: '#0f1c0f',
   urgentBorderAlpha: 'rgba(255,51,51,0.5)',
-  badgeFailedText: '#5ea86e',
+  badgeFailedText: '#6baf7a',
 
   badgeFreshBg: 'rgba(51,255,102,0.15)',
   badgeMidBg: 'rgba(153,255,51,0.15)',
@@ -315,12 +315,12 @@ const terminalLightColors: Palette = {
   border: '#1c3d1c',
   text: '#0a2e0a',
   textDim: '#2f6b2f',
-  textFaint: '#6b8f6b',
+  textFaint: '#4f6f4f',
 
   fresh: '#1f8f3f',
   mid: '#5c8f1f',
   urgent: '#c02020',
-  failed: '#6b8f6b',
+  failed: '#4f6f4f',
 
   accent: '#c02020',
   backdrop: 'rgba(10,30,10,0.4)',
@@ -328,7 +328,7 @@ const terminalLightColors: Palette = {
   failedCardBorder: '#bcd6bc',
   trackBg: '#dceedc',
   urgentBorderAlpha: 'rgba(192,32,32,0.35)',
-  badgeFailedText: '#2f6b2f',
+  badgeFailedText: '#255a25',
 
   badgeFreshBg: 'rgba(31,143,63,0.14)',
   badgeMidBg: 'rgba(92,143,31,0.16)',
