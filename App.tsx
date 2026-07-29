@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { AppState, Platform, StatusBar as RNStatusBar, StyleSheet, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useTaskStore } from './src/store/taskStore';
+import { resyncSystemMode } from './src/store/themeStore';
 import { SettingsScreen } from './src/ui/SettingsScreen';
 import { Tab, TabBar } from './src/ui/TabBar';
 import { TimelineScreen } from './src/ui/TimelineScreen';
@@ -31,10 +32,14 @@ function AppContent() {
     // Self-heal on resume: mobile OSes don't run us in the background, so the
     // authoritative correction happens when the app returns to the foreground.
     const subscription = AppState.addEventListener('change', (next) => {
-      if (next === 'active') sweep();
+      if (next === 'active') {
+        sweep();
+        resyncSystemMode();
+      }
     });
 
     sweep();
+    resyncSystemMode();
     return () => {
       clearInterval(interval);
       subscription.remove();

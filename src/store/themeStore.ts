@@ -10,7 +10,7 @@ const THEME_ID_KEY = 'themeId';
 const MODE_PREFERENCE_KEY = 'modePreference';
 
 function resolveSystemScheme(): Scheme {
-  return Appearance.getColorScheme() === 'light' ? 'light' : 'dark';
+  return Appearance.getColorScheme() === 'dark' ? 'dark' : 'light';
 }
 
 function isThemeId(value: string | undefined): value is ThemeId {
@@ -57,11 +57,26 @@ export const useThemeStore = create<ThemeStore>((set) => ({
   },
 }));
 
+/**
+ * Re-reads the OS scheme and corrects `mode` if it's out of sync. The seed
+ * value above is captured at module-import time, which on a cold start can
+ * race ahead of the native Appearance module reporting its real value — and
+ * since nothing else re-checks until the OS scheme actually changes, a bad
+ * snapshot sticks forever if the device just stays on one scheme. Call this
+ * from app-foreground/mount, mirroring how App.tsx already re-runs sweep()
+ * on resume to self-correct rather than trusting a stale in-memory read.
+ */
+export function resyncSystemMode(): void {
+  if (useThemeStore.getState().modePreference === 'system') {
+    useThemeStore.setState({ mode: resolveSystemScheme() });
+  }
+}
+
 // Keeps the resolved `mode` synced to live OS appearance changes while the
 // user's preference is 'system'. A 'light'/'dark' preference is user-locked
 // and this listener leaves it alone.
 Appearance.addChangeListener(({ colorScheme }) => {
   if (useThemeStore.getState().modePreference === 'system') {
-    useThemeStore.setState({ mode: colorScheme === 'light' ? 'light' : 'dark' });
+    useThemeStore.setState({ mode: colorScheme === 'dark' ? 'dark' : 'light' });
   }
 });
