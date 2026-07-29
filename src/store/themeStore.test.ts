@@ -83,4 +83,33 @@ describe('themeStore', () => {
     });
     expect(mode!).toBe('dark');
   });
+
+  it('resyncSystemMode corrects a stale mode against the current OS scheme', () => {
+    let mode: string;
+    jest.isolateModules(() => {
+      const { Appearance } = require('react-native');
+      const spy = jest.spyOn(Appearance, 'getColorScheme').mockReturnValue('dark');
+      const { useThemeStore, resyncSystemMode } = require('./themeStore');
+      // Simulates the module-load-time seed having raced ahead of the real
+      // OS value and landed on the wrong scheme.
+      useThemeStore.setState({ mode: 'dark' });
+      spy.mockReturnValue('light');
+      resyncSystemMode();
+      mode = useThemeStore.getState().mode;
+    });
+    expect(mode!).toBe('light');
+  });
+
+  it('resyncSystemMode leaves an explicit light/dark preference alone', () => {
+    let mode: string;
+    jest.isolateModules(() => {
+      const { Appearance } = require('react-native');
+      jest.spyOn(Appearance, 'getColorScheme').mockReturnValue('light');
+      const { useThemeStore, resyncSystemMode } = require('./themeStore');
+      useThemeStore.getState().setModePreference('dark');
+      resyncSystemMode();
+      mode = useThemeStore.getState().mode;
+    });
+    expect(mode!).toBe('dark');
+  });
 });
