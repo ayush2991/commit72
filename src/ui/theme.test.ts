@@ -36,17 +36,28 @@ describe('THEME_REGISTRY', () => {
     }
   });
 
-  it('fills badgeInk and statusInk with non-empty fresh/mid/urgent color strings', () => {
+  it('fills badgeInk and statusInk with non-empty fresh/mid/urgent/done color strings', () => {
     for (const id of THEME_ORDER) {
       const def = THEME_REGISTRY[id];
       for (const scheme of ['light', 'dark'] as const) {
         const palette = def.colors[scheme];
         for (const group of [palette.badgeInk, palette.statusInk]) {
-          for (const status of ['fresh', 'mid', 'urgent'] as const) {
+          for (const status of ['fresh', 'mid', 'urgent', 'done'] as const) {
             expect(typeof group[status]).toBe('string');
             expect(group[status].length).toBeGreaterThan(0);
           }
         }
+      }
+    }
+  });
+
+  it('gives done a color distinct from fresh, so completed and just-committed tasks are not confusable', () => {
+    for (const id of THEME_ORDER) {
+      const def = THEME_REGISTRY[id];
+      for (const scheme of ['light', 'dark'] as const) {
+        const palette = def.colors[scheme];
+        expect(palette.done.toLowerCase()).not.toBe(palette.fresh.toLowerCase());
+        expect(palette.badgeDoneBg.toLowerCase()).not.toBe(palette.badgeFreshBg.toLowerCase());
       }
     }
   });
@@ -132,12 +143,17 @@ describe('theme contrast (WCAG AA, normal text, 4.5:1)', () => {
   }
 });
 
-const BADGE_BG_KEYS = { fresh: 'badgeFreshBg', mid: 'badgeMidBg', urgent: 'badgeUrgentBg' } as const;
+const BADGE_BG_KEYS = {
+  fresh: 'badgeFreshBg',
+  mid: 'badgeMidBg',
+  urgent: 'badgeUrgentBg',
+  done: 'badgeDoneBg',
+} as const;
 
 describe('badgeInk / statusInk contrast (WCAG AA, small bold text, 4.5:1)', () => {
   for (const { name, colors, hardEdges } of resolvedPalettes()) {
     describe(name, () => {
-      for (const status of ['fresh', 'mid', 'urgent'] as const) {
+      for (const status of ['fresh', 'mid', 'urgent', 'done'] as const) {
         it(`badgeInk.${status} is readable against its rendered chip background`, () => {
           // Hard-edged themes (Brutalist, Terminal) render the badge as a
           // solid full-opacity chip of the status color itself; other themes
@@ -149,7 +165,7 @@ describe('badgeInk / statusInk contrast (WCAG AA, small bold text, 4.5:1)', () =
         });
       }
 
-      for (const status of ['fresh', 'mid', 'urgent'] as const) {
+      for (const status of ['fresh', 'mid', 'urgent', 'done'] as const) {
         it(`statusInk.${status} is readable against panel`, () => {
           expect(contrastRatio(colors.statusInk[status], colors.panel)).toBeGreaterThanOrEqual(
             AA_NORMAL_TEXT

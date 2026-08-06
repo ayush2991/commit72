@@ -20,6 +20,10 @@ export interface Palette {
   mid: string;
   urgent: string;
   failed: string;
+  /** Distinct hue for a completed task's badge/fill — must read as visually
+   * different from `fresh` (a fresh commitment) even though both are "good"
+   * states, otherwise the two badges are indistinguishable at a glance. */
+  done: string;
 
   accent: string;
   backdrop: string;
@@ -32,15 +36,16 @@ export interface Palette {
   badgeFreshBg: string;
   badgeMidBg: string;
   badgeUrgentBg: string;
+  badgeDoneBg: string;
 
-  /** Text color for the status badge chip's fresh/mid/urgent states — tuned
-   * per-palette against that palette's actual chip background (tinted or
-   * solid). The failed badge keeps using the dedicated badgeFailedText pair. */
-  badgeInk: { fresh: string; mid: string; urgent: string };
+  /** Text color for the status badge chip's fresh/mid/urgent/done states —
+   * tuned per-palette against that palette's actual chip background (tinted
+   * or solid). The failed badge keeps using the dedicated badgeFailedText pair. */
+  badgeInk: { fresh: string; mid: string; urgent: string; done: string };
   /** Text color for a status hue painted directly on a plain surface (no
    * chip), e.g. the pet mood label and the hot countdown text. `failed`
    * reuses the `failed` token itself, which is already tuned for this. */
-  statusInk: { fresh: string; mid: string; urgent: string };
+  statusInk: { fresh: string; mid: string; urgent: string; done: string };
 }
 
 /**
@@ -62,6 +67,7 @@ const darkColors: Palette = {
   mid: '#f5c542',
   urgent: '#f44734', // hsl(6 90% 58%)
   failed: '#7c8088',
+  done: '#5b8cff',
 
   accent: '#f2643a', // hsl(6 85% 55%)
   backdrop: 'rgba(0,0,0,0.55)',
@@ -74,9 +80,10 @@ const darkColors: Palette = {
   badgeFreshBg: 'rgba(61,220,132,0.15)',
   badgeMidBg: 'rgba(245,197,66,0.15)',
   badgeUrgentBg: 'rgba(244,71,52,0.18)',
+  badgeDoneBg: 'rgba(91,140,255,0.16)',
 
-  badgeInk: { fresh: '#3ddc84', mid: '#f5c542', urgent: '#f55846' },
-  statusInk: { fresh: '#3ddc84', mid: '#f5c542', urgent: '#f44734' },
+  badgeInk: { fresh: '#3ddc84', mid: '#f5c542', urgent: '#f55846', done: '#5b8cff' },
+  statusInk: { fresh: '#3ddc84', mid: '#f5c542', urgent: '#f44734', done: '#5b8cff' },
 };
 
 const lightColors: Palette = {
@@ -93,6 +100,7 @@ const lightColors: Palette = {
   mid: '#a3760a',
   urgent: '#d8321e',
   failed: '#696c75',
+  done: '#3159c9',
 
   accent: '#d8321e',
   backdrop: 'rgba(0,0,0,0.35)',
@@ -105,9 +113,10 @@ const lightColors: Palette = {
   badgeFreshBg: 'rgba(31,162,90,0.12)',
   badgeMidBg: 'rgba(163,118,10,0.12)',
   badgeUrgentBg: 'rgba(216,50,30,0.14)',
+  badgeDoneBg: 'rgba(49,89,201,0.12)',
 
-  badgeInk: { fresh: '#187d45', mid: '#8c6509', urgent: '#c22d1b' },
-  statusInk: { fresh: '#1a864b', mid: '#996f09', urgent: '#d8321e' },
+  badgeInk: { fresh: '#187d45', mid: '#8c6509', urgent: '#c22d1b', done: '#2848a8' },
+  statusInk: { fresh: '#1a864b', mid: '#996f09', urgent: '#d8321e', done: '#2848a8' },
 };
 
 // Lifted from the "1e — BLOCK" mockup option (Commit72.dc.html): a fixed
@@ -126,6 +135,7 @@ const brutalistColors: Palette = {
   mid: '#00a86b',
   urgent: '#ff3b19',
   failed: '#5c5c5c',
+  done: '#7b2fd1',
 
   accent: '#ff3b19',
   backdrop: 'rgba(17,17,17,0.55)',
@@ -138,9 +148,10 @@ const brutalistColors: Palette = {
   badgeFreshBg: 'rgba(77,77,255,0.16)',
   badgeMidBg: 'rgba(0,168,107,0.16)',
   badgeUrgentBg: 'rgba(255,59,25,0.18)',
+  badgeDoneBg: 'rgba(123,47,209,0.16)',
 
-  badgeInk: { fresh: '#e8e8ff', mid: '#003220', urgent: '#460a00' },
-  statusInk: { fresh: '#4d4dff', mid: '#008857', urgent: '#e62200' },
+  badgeInk: { fresh: '#e8e8ff', mid: '#003220', urgent: '#460a00', done: '#f0e6ff' },
+  statusInk: { fresh: '#4d4dff', mid: '#008857', urgent: '#e62200', done: '#5b21b6' },
 };
 
 // Dark twin of Brutalist: ink becomes the surface, paper becomes the ink.
@@ -159,6 +170,7 @@ const brutalistDarkColors: Palette = {
   mid: '#00c880',
   urgent: '#ff5a3a',
   failed: '#8a8a8a',
+  done: '#b388ff',
 
   accent: '#ff5a3a',
   backdrop: 'rgba(0,0,0,0.65)',
@@ -171,9 +183,10 @@ const brutalistDarkColors: Palette = {
   badgeFreshBg: 'rgba(122,122,255,0.18)',
   badgeMidBg: 'rgba(0,200,128,0.18)',
   badgeUrgentBg: 'rgba(255,90,58,0.2)',
+  badgeDoneBg: 'rgba(179,136,255,0.2)',
 
-  badgeInk: { fresh: '#000084', mid: '#004c31', urgent: '#580e00' },
-  statusInk: { fresh: '#7a7aff', mid: '#00c880', urgent: '#ff5a3a' },
+  badgeInk: { fresh: '#000084', mid: '#004c31', urgent: '#580e00', done: '#2c0a5c' },
+  statusInk: { fresh: '#7a7aff', mid: '#00c880', urgent: '#ff5a3a', done: '#b388ff' },
 };
 
 // Deep purple-black void with magenta/cyan neon accents — an arcade-cabinet
@@ -192,6 +205,7 @@ const neonArcadeColors: Palette = {
   mid: '#ffe14d',
   urgent: '#ff2e88',
   failed: '#867798',
+  done: '#22e0ff',
 
   accent: '#ff2e88',
   backdrop: 'rgba(10,0,20,0.65)',
@@ -204,9 +218,10 @@ const neonArcadeColors: Palette = {
   badgeFreshBg: 'rgba(57,255,158,0.16)',
   badgeMidBg: 'rgba(255,225,77,0.16)',
   badgeUrgentBg: 'rgba(255,46,136,0.2)',
+  badgeDoneBg: 'rgba(34,224,255,0.18)',
 
-  badgeInk: { fresh: '#39ff9e', mid: '#ffe14d', urgent: '#ff3f92' },
-  statusInk: { fresh: '#39ff9e', mid: '#ffe14d', urgent: '#ff2e88' },
+  badgeInk: { fresh: '#39ff9e', mid: '#ffe14d', urgent: '#ff3f92', done: '#22e0ff' },
+  statusInk: { fresh: '#39ff9e', mid: '#ffe14d', urgent: '#ff2e88', done: '#22e0ff' },
 };
 
 // Light twin of Neon Arcade: bright lavender paper, deep-purple ink, same
@@ -225,6 +240,7 @@ const neonArcadeLightColors: Palette = {
   mid: '#b8860a',
   urgent: '#d1146b',
   failed: '#6f5a90',
+  done: '#0e7490',
 
   accent: '#d1146b',
   backdrop: 'rgba(26,3,48,0.35)',
@@ -237,9 +253,10 @@ const neonArcadeLightColors: Palette = {
   badgeFreshBg: 'rgba(14,158,99,0.14)',
   badgeMidBg: 'rgba(184,134,10,0.16)',
   badgeUrgentBg: 'rgba(209,20,107,0.16)',
+  badgeDoneBg: 'rgba(14,116,144,0.14)',
 
-  badgeInk: { fresh: '#0b7a4c', mid: '#8a6408', urgent: '#c01262' },
-  statusInk: { fresh: '#0c8654', mid: '#996f08', urgent: '#d1146b' },
+  badgeInk: { fresh: '#0b7a4c', mid: '#8a6408', urgent: '#c01262', done: '#0b5b70' },
+  statusInk: { fresh: '#0c8654', mid: '#996f08', urgent: '#d1146b', done: '#0b6478' },
 };
 
 // Warm cream/peach with coral + teal accents — optimistic morning light,
@@ -258,6 +275,7 @@ const sunriseColors: Palette = {
   mid: '#e9a13b',
   urgent: '#e8613f',
   failed: '#7a614e',
+  done: '#3d6cb9',
 
   accent: '#e8613f',
   backdrop: 'rgba(58,42,32,0.35)',
@@ -270,9 +288,10 @@ const sunriseColors: Palette = {
   badgeFreshBg: 'rgba(42,157,143,0.14)',
   badgeMidBg: 'rgba(233,161,59,0.16)',
   badgeUrgentBg: 'rgba(232,97,63,0.16)',
+  badgeDoneBg: 'rgba(61,108,185,0.14)',
 
-  badgeInk: { fresh: '#20766b', mid: '#965f11', urgent: '#be3817' },
-  statusInk: { fresh: '#228175', mid: '#a06512', urgent: '#d33f19' },
+  badgeInk: { fresh: '#20766b', mid: '#965f11', urgent: '#be3817', done: '#2c4f8c' },
+  statusInk: { fresh: '#228175', mid: '#a06512', urgent: '#d33f19', done: '#30589c' },
 };
 
 // Dark/dusk twin of Sunrise: warm plum-brown afterglow instead of cream
@@ -291,6 +310,7 @@ const sunriseDarkColors: Palette = {
   mid: '#f5b95a',
   urgent: '#ff8562',
   failed: '#ac9a91',
+  done: '#7aa7e8',
 
   accent: '#ff8562',
   backdrop: 'rgba(0,0,0,0.6)',
@@ -303,9 +323,10 @@ const sunriseDarkColors: Palette = {
   badgeFreshBg: 'rgba(78,205,189,0.16)',
   badgeMidBg: 'rgba(245,185,90,0.16)',
   badgeUrgentBg: 'rgba(255,133,98,0.2)',
+  badgeDoneBg: 'rgba(122,167,232,0.18)',
 
-  badgeInk: { fresh: '#4ecdbd', mid: '#f5b95a', urgent: '#ff8f6f' },
-  statusInk: { fresh: '#4ecdbd', mid: '#f5b95a', urgent: '#ff8562' },
+  badgeInk: { fresh: '#4ecdbd', mid: '#f5b95a', urgent: '#ff8f6f', done: '#8db6f0' },
+  statusInk: { fresh: '#4ecdbd', mid: '#f5b95a', urgent: '#ff8562', done: '#7aa7e8' },
 };
 
 // Pure-black CRT terminal — monochrome phosphor green with a single red
@@ -324,6 +345,7 @@ const terminalColors: Palette = {
   mid: '#99ff33',
   urgent: '#ff3333',
   failed: '#598759',
+  done: '#33fff0',
 
   accent: '#ff3333',
   backdrop: 'rgba(0,0,0,0.7)',
@@ -336,9 +358,10 @@ const terminalColors: Palette = {
   badgeFreshBg: 'rgba(51,255,102,0.15)',
   badgeMidBg: 'rgba(153,255,51,0.15)',
   badgeUrgentBg: 'rgba(255,51,51,0.2)',
+  badgeDoneBg: 'rgba(51,255,240,0.15)',
 
-  badgeInk: { fresh: '#00711c', mid: '#3a7400', urgent: '#460000' },
-  statusInk: { fresh: '#33ff66', mid: '#99ff33', urgent: '#ff3333' },
+  badgeInk: { fresh: '#00711c', mid: '#3a7400', urgent: '#460000', done: '#003d38' },
+  statusInk: { fresh: '#33ff66', mid: '#99ff33', urgent: '#ff3333', done: '#33fff0' },
 };
 
 // Light twin of Terminal: pale green-tinted "printout paper" instead of a
@@ -357,6 +380,7 @@ const terminalLightColors: Palette = {
   mid: '#5c8f1f',
   urgent: '#c02020',
   failed: '#4f6f4f',
+  done: '#0f766e',
 
   accent: '#c02020',
   backdrop: 'rgba(10,30,10,0.4)',
@@ -369,9 +393,10 @@ const terminalLightColors: Palette = {
   badgeFreshBg: 'rgba(31,143,63,0.14)',
   badgeMidBg: 'rgba(92,143,31,0.16)',
   badgeUrgentBg: 'rgba(192,32,32,0.16)',
+  badgeDoneBg: 'rgba(15,118,110,0.14)',
 
-  badgeInk: { fresh: '#051509', mid: '#111b06', urgent: '#f8d8d8' },
-  statusInk: { fresh: '#1d853b', mid: '#527f1c', urgent: '#c02020' },
+  badgeInk: { fresh: '#051509', mid: '#111b06', urgent: '#f8d8d8', done: '#d8fff8' },
+  statusInk: { fresh: '#1d853b', mid: '#527f1c', urgent: '#c02020', done: '#0f766e' },
 };
 
 const defaultPalettes: Record<Scheme, Palette> = { dark: darkColors, light: lightColors };
@@ -381,12 +406,12 @@ const sunrisePalettes: Record<Scheme, Palette> = { light: sunriseColors, dark: s
 const terminalPalettes: Record<Scheme, Palette> = { dark: terminalColors, light: terminalLightColors };
 
 export function makeStatusColor(p: Palette): Record<TaskStatus, string> {
-  return { done: p.fresh, fresh: p.fresh, mid: p.mid, urgent: p.urgent, failed: p.failed };
+  return { done: p.done, fresh: p.fresh, mid: p.mid, urgent: p.urgent, failed: p.failed };
 }
 
 export function makeBadgeBg(p: Palette): Record<TaskStatus, string> {
   return {
-    done: p.badgeFreshBg,
+    done: p.badgeDoneBg,
     fresh: p.badgeFreshBg,
     mid: p.badgeMidBg,
     urgent: p.badgeUrgentBg,
@@ -396,7 +421,7 @@ export function makeBadgeBg(p: Palette): Record<TaskStatus, string> {
 
 export function makeBadgeInk(p: Palette): Record<TaskStatus, string> {
   return {
-    done: p.badgeInk.fresh,
+    done: p.badgeInk.done,
     fresh: p.badgeInk.fresh,
     mid: p.badgeInk.mid,
     urgent: p.badgeInk.urgent,
@@ -406,7 +431,7 @@ export function makeBadgeInk(p: Palette): Record<TaskStatus, string> {
 
 export function makeStatusInk(p: Palette): Record<TaskStatus, string> {
   return {
-    done: p.statusInk.fresh,
+    done: p.statusInk.done,
     fresh: p.statusInk.fresh,
     mid: p.statusInk.mid,
     urgent: p.statusInk.urgent,
